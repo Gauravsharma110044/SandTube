@@ -63,7 +63,7 @@ const VideoGrid: React.FC = () => {
             <div style={{
                 display: 'flex',
                 gap: '12px',
-                paddingBottom: '25px',
+                paddingBottom: '20px',
                 overflowX: 'auto',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -72,20 +72,21 @@ const VideoGrid: React.FC = () => {
                 background: 'var(--bg-dark)',
                 zIndex: 10,
                 marginTop: '-20px',
-                paddingTop: '20px'
+                paddingTop: '20px',
+                paddingLeft: '2px'
             }}>
                 {categories.map((cat, i) => (
                     <button
                         key={i}
                         onClick={() => handleCategoryClick(cat)}
                         style={{
-                            padding: '8px 16px',
+                            padding: '6px 14px',
                             background: currentQuery === cat ? 'white' : 'var(--surface)',
                             color: currentQuery === cat ? 'black' : 'white',
                             borderRadius: '8px',
                             whiteSpace: 'nowrap',
                             cursor: 'pointer',
-                            fontSize: '0.9rem',
+                            fontSize: '0.85rem',
                             fontWeight: '500',
                             transition: 'all 0.2s ease',
                             border: currentQuery === cat ? 'none' : '1px solid var(--glass-border)'
@@ -97,10 +98,8 @@ const VideoGrid: React.FC = () => {
             </div>
 
             {/* Video Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '30px 20px'
+            <div className="responsive-grid" style={{
+                marginTop: '10px'
             }}>
                 {loading ? (
                     Array(12).fill(0).map((_, i) => (
@@ -137,6 +136,12 @@ const VideoGrid: React.FC = () => {
                     0% { opacity: 0.5; }
                     50% { opacity: 0.8; }
                     100% { opacity: 0.5; }
+                }
+                @media (max-width: 768px) {
+                  .responsive-grid {
+                    grid-template-columns: 1fr;
+                    gap: 30px;
+                  }
                 }
             `}</style>
         </div>

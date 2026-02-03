@@ -68,16 +68,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             left: 0,
             top: '70px',
             bottom: 0,
-            width: isOpen ? '240px' : '0',
+            width: '240px',
             background: 'var(--bg-dark)',
             overflowY: 'auto',
-            transition: 'width 0.3s ease',
-            borderRight: isOpen ? '1px solid var(--glass-border)' : 'none',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            borderRight: '1px solid var(--glass-border)',
             paddingTop: '10px',
             display: 'flex',
             flexDirection: 'column',
-            zIndex: 900,
+            zIndex: 1500,
             transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+            boxShadow: isOpen && window.innerWidth <= 768 ? '10px 0 30px rgba(0,0,0,0.5)' : 'none'
         }}>
             <SidebarItem icon={<Home size={22} />} label="Home" active={isActive('/')} onClick={() => navigate('/')} />
             <SidebarItem icon={<PlaySquare size={22} />} label="Shorts" active={isActive('/shorts')} onClick={() => navigate('/shorts')} />

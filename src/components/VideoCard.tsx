@@ -11,9 +11,10 @@ interface VideoCardProps {
     views: string;
     timestamp: string;
     channelImage: string;
+    horizontal?: boolean;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, channelId, views, timestamp, channelImage }) => {
+const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, channelId, views, timestamp, channelImage, horizontal = false }) => {
     const navigate = useNavigate();
 
     const handleChannelClick = (e: React.MouseEvent) => {
@@ -26,11 +27,25 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
 
     return (
         <div
-            className="video-card"
+            className={`video-card ${horizontal ? 'horizontal' : ''}`}
             onClick={() => navigate(`/watch/${id}`)}
-            style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '12px' }}
+            style={{
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: horizontal ? 'row' : 'column',
+                gap: '12px',
+                width: '100%',
+                marginBottom: horizontal ? '4px' : '0'
+            }}
         >
-            <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{
+                position: 'relative',
+                width: horizontal ? (window.innerWidth <= 480 ? '120px' : '160px') : '100%',
+                flexShrink: 0,
+                aspectRatio: '16/9',
+                borderRadius: '8px',
+                overflow: 'hidden'
+            }}>
                 <img
                     src={thumbnail}
                     alt={title}
@@ -38,62 +53,62 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
                 />
                 <div style={{
                     position: 'absolute',
-                    bottom: '10px',
-                    right: '10px',
+                    bottom: '6px',
+                    right: '6px',
                     background: 'rgba(0,0,0,0.8)',
-                    padding: '2px 6px',
+                    padding: '1px 4px',
                     borderRadius: '4px',
-                    fontSize: '0.8rem',
+                    fontSize: '0.75rem',
                     fontWeight: '500'
                 }}>
                     12:45
                 </div>
-                <div
-                    className="mini-player-btn"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.dispatchEvent(new CustomEvent('setMiniPlayer', { detail: id }));
-                    }}
-                    style={{
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        background: 'rgba(0,0,0,0.6)',
-                        padding: '8px',
-                        borderRadius: '50%',
-                        opacity: 0,
-                        transition: 'opacity 0.2s',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 5
-                    }}
-                    title="Play in Mini Player"
-                >
-                    <Maximize2 size={18} />
-                </div>
-                <style>{`
-                    .video-card:hover .mini-player-btn {
-                        opacity: 1 !important;
-                    }
-                `}</style>
+                {!horizontal && (
+                    <div
+                        className="mini-player-btn"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.dispatchEvent(new CustomEvent('setMiniPlayer', { detail: id }));
+                        }}
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            background: 'rgba(0,0,0,0.6)',
+                            padding: '8px',
+                            borderRadius: '50%',
+                            opacity: 0,
+                            transition: 'opacity 0.2s',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 5
+                        }}
+                        title="Play in Mini Player"
+                    >
+                        <Maximize2 size={18} />
+                    </div>
+                )}
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
-                <img
-                    src={channelImage}
-                    alt={channel}
-                    onClick={handleChannelClick}
-                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
-                />
-                <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', gap: horizontal ? '0' : '12px', flex: 1 }}>
+                {!horizontal && (
+                    <img
+                        src={channelImage}
+                        alt={channel}
+                        onClick={handleChannelClick}
+                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                )}
+                <div style={{ flex: 1, overflow: 'hidden' }}>
                     <h3 style={{
-                        fontSize: '1rem',
+                        fontSize: horizontal ? '0.9rem' : '1rem',
                         margin: '0 0 4px 0',
                         lineHeight: '1.4',
                         fontWeight: '600',
+                        color: 'white',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -101,22 +116,33 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
                     }}>
                         {title}
                     </h3>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: horizontal ? '0.8rem' : '0.9rem', color: 'var(--text-muted)' }}>
                         <div
                             onClick={handleChannelClick}
-                            style={{ transition: 'color 0.2s' }}
+                            style={{ transition: 'color 0.2s', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                             onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
                             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
                         >
                             {channel}
                         </div>
-                        <div>{views} views • {timestamp}</div>
+                        <div>{views && `${views} views • `}{timestamp}</div>
                     </div>
                 </div>
-                <button style={{ background: 'none', border: 'none', color: 'white', alignSelf: 'flex-start', padding: '4px', cursor: 'pointer' }}>
-                    <MoreVertical size={18} />
-                </button>
+                {!horizontal && (
+                    <button style={{ background: 'none', border: 'none', color: 'white', alignSelf: 'flex-start', padding: '4px', cursor: 'pointer' }}>
+                        <MoreVertical size={18} />
+                    </button>
+                )}
             </div>
+
+            <style>{`
+                .video-card:hover .mini-player-btn {
+                    opacity: 1 !important;
+                }
+                .video-card.horizontal:hover h3 {
+                    color: var(--primary) !important;
+                }
+            `}</style>
         </div>
     );
 };
