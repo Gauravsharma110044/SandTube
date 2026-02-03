@@ -22,20 +22,23 @@ export const getPopularVideos = async () => {
     return response.data.items;
 };
 
-export const searchVideos = async (query: string) => {
+export const searchVideos = async (query: string, filters: any = {}) => {
     const response = await youtube.get('/search', {
         params: {
             part: 'snippet',
             q: query,
             type: 'video',
-            maxResults: 20
+            maxResults: 20,
+            ...filters
         }
     });
     return response.data.items;
 };
 
-export const getEnrichedSearchResults = async (query: string) => {
-    const searchItems = await searchVideos(query);
+export const getEnrichedSearchResults = async (query: string, filters: any = {}) => {
+    const searchItems = await searchVideos(query, filters);
+    if (!searchItems || searchItems.length === 0) return [];
+
     const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
     const channelIds = Array.from(new Set(searchItems.map((item: any) => item.snippet.channelId))).join(',');
 
