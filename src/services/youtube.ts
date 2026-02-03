@@ -215,11 +215,31 @@ export const getShorts = async () => {
     const response = await youtube.get('/search', {
         params: {
             part: 'snippet',
-            q: '#shorts',
+            q: '#shorts sand art',
             type: 'video',
             videoDuration: 'short',
-            maxResults: 20
+            maxResults: 10
         }
     });
-    return response.data.items;
+
+    const searchItems = response.data.items;
+    const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
+
+    const statsResponse = await youtube.get('/videos', {
+        params: {
+            part: 'statistics,contentDetails',
+            id: videoIds
+        }
+    });
+
+    const videoDetails = statsResponse.data.items;
+
+    return searchItems.map((item: any) => {
+        const details = videoDetails.find((v: any) => v.id === item.id.videoId);
+        return {
+            ...item,
+            statistics: details?.statistics,
+            contentDetails: details?.contentDetails
+        };
+    });
 };
