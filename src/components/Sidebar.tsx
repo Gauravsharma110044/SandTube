@@ -58,6 +58,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
     const isActive = (path: string) => location.pathname === path;
 
+    const handleExploreClick = (label: string) => {
+        navigate(`/?search=${encodeURIComponent(label)}`);
+    };
+
     return (
         <aside style={{
             position: 'fixed',
@@ -77,25 +81,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         }}>
             <SidebarItem icon={<Home size={22} />} label="Home" active={isActive('/')} onClick={() => navigate('/')} />
             <SidebarItem icon={<PlaySquare size={22} />} label="Shorts" active={isActive('/shorts')} onClick={() => navigate('/shorts')} />
-            <SidebarItem icon={<History size={22} />} label="Subscriptions" />
+            <SidebarItem icon={<History size={22} />} label="Subscriptions" active={isActive('/subscriptions')} onClick={() => navigate('/subscriptions')} />
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
 
             <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>You</div>
             <SidebarItem icon={<LibraryIcon size={22} />} label="Library" active={isActive('/library')} onClick={() => navigate('/library')} />
-            <SidebarItem icon={<History size={22} />} label="History" />
+            <SidebarItem icon={<History size={22} />} label="History" active={isActive('/history')} onClick={() => navigate('/history')} />
             <SidebarItem icon={<PlaySquare size={22} />} label="Your videos" />
             <SidebarItem icon={<Clock size={22} />} label="Watch later" />
-            <SidebarItem icon={<ThumbsUp size={22} />} label="Liked videos" />
+            <SidebarItem icon={<ThumbsUp size={22} />} label="Liked videos" active={isActive('/liked-videos')} onClick={() => navigate('/liked-videos')} />
 
             {user && subscriptions.length > 0 && (
                 <>
                     <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
                     <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>Subscriptions</div>
                     {subscriptions.map(sub => (
-                        <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px 20px', cursor: 'pointer', borderRadius: '12px', margin: '2px 10px' }} className="sidebar-item">
+                        <div
+                            key={sub.id}
+                            onClick={() => handleExploreClick(sub.snippet.title)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px 20px', cursor: 'pointer', borderRadius: '12px', margin: '2px 10px' }}
+                            className="sidebar-item"
+                        >
                             <img src={sub.snippet.thumbnails.default.url} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
-                            <span style={{ fontSize: '0.9rem' }}>{sub.snippet.title}</span>
+                            <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.snippet.title}</span>
                         </div>
                     ))}
                 </>
@@ -104,11 +113,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
 
             <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>Explore</div>
-            <SidebarItem icon={<ExploreIcon size={22} />} label="Trending" />
-            <SidebarItem icon={<Music size={22} />} label="Music" />
-            <SidebarItem icon={<Trophy size={22} />} label="Gaming" />
-            <SidebarItem icon={<Newspaper size={22} />} label="News" />
-            <SidebarItem icon={<Gamepad2 size={22} />} label="Sports" />
+            <SidebarItem icon={<ExploreIcon size={22} />} label="Trending" onClick={() => handleExploreClick('Trending')} />
+            <SidebarItem icon={<Music size={22} />} label="Music" onClick={() => handleExploreClick('Music')} />
+            <SidebarItem icon={<Trophy size={22} />} label="Gaming" onClick={() => handleExploreClick('Gaming')} />
+            <SidebarItem icon={<Newspaper size={22} />} label="News" onClick={() => handleExploreClick('News')} />
+            <SidebarItem icon={<Gamepad2 size={22} />} label="Sports" onClick={() => handleExploreClick('Sports')} />
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
 

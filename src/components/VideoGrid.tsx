@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
 import { getPopularVideos, searchVideos } from '../services/youtube.ts';
 
@@ -8,8 +8,11 @@ const categories = ["All", "Sand Art", "Tech", "Gaming", "Music", "Live", "Artif
 const VideoGrid: React.FC = () => {
     const [videos, setVideos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedCategory, setSelectedCategory] = useState("All");
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const searchParams = new URLSearchParams(location.search);
+    const currentQuery = searchParams.get('search') || "All";
 
     useEffect(() => {
         const fetchVideos = async () => {
@@ -19,7 +22,7 @@ const VideoGrid: React.FC = () => {
                 const query = searchParams.get('search');
 
                 let fetchedVideos;
-                if (query) {
+                if (query && query !== "All") {
                     fetchedVideos = await searchVideos(query);
                 } else {
                     fetchedVideos = await getPopularVideos();
@@ -34,6 +37,14 @@ const VideoGrid: React.FC = () => {
 
         fetchVideos();
     }, [location.search]);
+
+    const handleCategoryClick = (cat: string) => {
+        if (cat === "All") {
+            navigate('/');
+        } else {
+            navigate(`/?search=${encodeURIComponent(cat)}`);
+        }
+    };
 
     const formatViews = (views: string) => {
         if (!views) return 'N/A';
@@ -51,7 +62,7 @@ const VideoGrid: React.FC = () => {
         if (days >= 365) return Math.floor(days / 365) + ' years ago';
         if (days >= 30) return Math.floor(days / 30) + ' months ago';
         if (days >= 7) return Math.floor(days / 7) + ' weeks ago';
-        if (days > 0) return days + ' days ago';
+        if (days > 0) return `${days} days ago`;
         return 'Today';
     };
 
@@ -75,18 +86,18 @@ const VideoGrid: React.FC = () => {
                 {categories.map((cat, i) => (
                     <button
                         key={i}
-                        onClick={() => setSelectedCategory(cat)}
+                        onClick={() => handleCategoryClick(cat)}
                         style={{
                             padding: '8px 16px',
-                            background: selectedCategory === cat ? 'white' : 'var(--surface)',
-                            color: selectedCategory === cat ? 'black' : 'white',
+                            background: currentQuery === cat ? 'white' : 'var(--surface)',
+                            color: currentQuery === cat ? 'black' : 'white',
                             borderRadius: '8px',
                             whiteSpace: 'nowrap',
                             cursor: 'pointer',
                             fontSize: '0.9rem',
                             fontWeight: '500',
                             transition: 'all 0.2s ease',
-                            border: selectedCategory === cat ? 'none' : '1px solid var(--glass-border)'
+                            border: currentQuery === cat ? 'none' : '1px solid var(--glass-border)'
                         }}
                     >
                         {cat}
