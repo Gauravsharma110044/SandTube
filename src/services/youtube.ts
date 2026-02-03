@@ -108,6 +108,45 @@ export const getMyChannel = async (accessToken: string) => {
     return response.data.items[0];
 };
 
+export const getMyPlaylists = async (accessToken: string) => {
+    const response = await axios.get(`${BASE_URL}/playlists`, {
+        params: {
+            part: 'snippet,contentDetails',
+            mine: true,
+            maxResults: 10
+        },
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+    return response.data.items;
+};
+
+export const getPlaylistItems = async (playlistId: string) => {
+    const response = await youtube.get('/playlistItems', {
+        params: {
+            part: 'snippet,contentDetails',
+            playlistId: playlistId,
+            maxResults: 10
+        }
+    });
+    return response.data.items;
+};
+
+export const getMyActivities = async (accessToken: string) => {
+    const response = await axios.get(`${BASE_URL}/activities`, {
+        params: {
+            part: 'snippet,contentDetails',
+            mine: true,
+            maxResults: 20
+        },
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+    return response.data.items;
+};
+
 export const getVideoComments = async (videoId: string) => {
     const response = await youtube.get('/commentThreads', {
         params: {
