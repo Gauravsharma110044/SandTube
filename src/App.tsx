@@ -9,6 +9,9 @@ import SettingsPanel from './components/SettingsPanel.tsx';
 import Shorts from './components/Shorts.tsx';
 import Library from './components/Library.tsx';
 import MiniPlayer from './components/MiniPlayer.tsx';
+import HistoryPage from './components/HistoryPage.tsx';
+import LikedVideosPage from './components/LikedVideosPage.tsx';
+import SubscriptionsPage from './components/SubscriptionsPage.tsx';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -42,6 +45,9 @@ const App: React.FC = () => {
               <Route path="/settings" element={<SettingsPanel />} />
               <Route path="/shorts" element={<Shorts />} />
               <Route path="/library" element={<Library />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/liked-videos" element={<LikedVideosPage />} />
+              <Route path="/subscriptions" element={<SubscriptionsPage />} />
             </Routes>
           </main>
         </div>
