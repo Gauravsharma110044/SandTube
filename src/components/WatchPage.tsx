@@ -28,6 +28,16 @@ const WatchPage: React.FC = () => {
                     const chDetails = await getChannelDetails(details.snippet.channelId);
                     setChannel(chDetails);
                 }
+
+                // Add to local history
+                if (details) {
+                    const localHistory = JSON.parse(localStorage.getItem('sandtube_history') || '[]');
+                    const updatedHistory = [
+                        { ...details, watchedAt: new Date().toISOString() },
+                        ...localHistory.filter((item: any) => (item.id.videoId || item.id) !== id)
+                    ].slice(0, 50); // Keep last 50
+                    localStorage.setItem('sandtube_history', JSON.stringify(updatedHistory));
+                }
             } catch (error) {
                 console.error("Error fetching watch data:", error);
             } finally {
