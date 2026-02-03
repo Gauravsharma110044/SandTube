@@ -34,6 +34,42 @@ export const searchVideos = async (query: string) => {
     return response.data.items;
 };
 
+export const getEnrichedSearchResults = async (query: string) => {
+    const searchItems = await searchVideos(query);
+    const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
+    const channelIds = Array.from(new Set(searchItems.map((item: any) => item.snippet.channelId))).join(',');
+
+    const [videosResponse, channelsResponse] = await Promise.all([
+        youtube.get('/videos', { params: { part: 'snippet,contentDetails,statistics', id: videoIds } }),
+        youtube.get('/channels', { params: { part: 'snippet,statistics', id: channelIds } })
+    ]);
+
+    const videoDetails = videosResponse.data.items;
+    const channelDetails = channelsResponse.data.items;
+
+    return searchItems.map((item: any) => {
+        const fullVideo = videoDetails.find((v: any) => v.id === item.id.videoId);
+        const fullChannel = channelDetails.find((c: any) => c.id === item.snippet.channelId);
+        return {
+            ...item,
+            statistics: fullVideo?.statistics,
+            contentDetails: fullVideo?.contentDetails,
+            channelDetails: fullChannel
+        };
+    });
+};
+
+export const getSearchSuggestions = async (query: string) => {
+    // Note: This uses a non-official endpoint often used for suggestions
+    try {
+        const response = await axios.get(`https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`);
+        return response.data[1];
+    } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        return [];
+    }
+};
+
 export const getVideoDetails = async (videoId: string) => {
     const response = await youtube.get('/videos', {
         params: {

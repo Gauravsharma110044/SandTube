@@ -14,6 +14,7 @@ import LikedVideosPage from './components/LikedVideosPage.tsx';
 import SubscriptionsPage from './components/SubscriptionsPage.tsx';
 import ChannelPage from './components/ChannelPage.tsx';
 import PlaylistPage from './components/PlaylistPage.tsx';
+import SearchPage from './components/SearchPage.tsx';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -52,6 +53,7 @@ const App: React.FC = () => {
               <Route path="/subscriptions" element={<SubscriptionsPage />} />
               <Route path="/channel/:channelId" element={<ChannelPage />} />
               <Route path="/playlist/:playlistId" element={<PlaylistPage />} />
+              <Route path="/search" element={<SearchPage />} />
             </Routes>
           </main>
         </div>
