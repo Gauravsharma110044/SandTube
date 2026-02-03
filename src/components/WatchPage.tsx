@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ThumbsUp, ThumbsDown, Share2, Download, MoreHorizontal, Maximize2, Plus } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Share2, Download, MoreHorizontal, Plus } from 'lucide-react';
 import VideoCard from './VideoCard.tsx';
 import VideoPlayer from './VideoPlayer.tsx';
 import CommentSection from './CommentSection.tsx';
@@ -15,7 +15,6 @@ const WatchPage: React.FC = () => {
     const [channel, setChannel] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showPlaylistModal, setShowPlaylistModal] = useState(false);
-    const [isTheatreMode, setIsTheatreMode] = useState(false);
     const [autoplayEnabled, setAutoplayEnabled] = useState(true);
     const [nextVideoCountdown, setNextVideoCountdown] = useState<number | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 1000);
@@ -96,7 +95,7 @@ const WatchPage: React.FC = () => {
         return () => clearTimeout(timer);
     }, [nextVideoCountdown, relatedVideos, navigate]);
 
-    const effectiveTheatreMode = isTheatreMode || isSmallScreen;
+    const effectiveTheatreMode = isSmallScreen;
 
     return (
         <div style={{
