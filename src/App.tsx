@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar.tsx';
 import Sidebar from './components/Sidebar.tsx';
@@ -8,9 +8,19 @@ import UploadDashboard from './components/UploadDashboard.tsx';
 import SettingsPanel from './components/SettingsPanel.tsx';
 import Shorts from './components/Shorts.tsx';
 import Library from './components/Library.tsx';
+import MiniPlayer from './components/MiniPlayer.tsx';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [miniPlayerVideoId, setMiniPlayerVideoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleSetMiniPlayer = (e: any) => {
+      setMiniPlayerVideoId(e.detail);
+    };
+    window.addEventListener('setMiniPlayer', handleSetMiniPlayer);
+    return () => window.removeEventListener('setMiniPlayer', handleSetMiniPlayer);
+  }, []);
 
   return (
     <Router>
@@ -35,6 +45,12 @@ const App: React.FC = () => {
             </Routes>
           </main>
         </div>
+        {miniPlayerVideoId && (
+          <MiniPlayer
+            videoId={miniPlayerVideoId}
+            onClose={() => setMiniPlayerVideoId(null)}
+          />
+        )}
       </div>
     </Router>
   );
