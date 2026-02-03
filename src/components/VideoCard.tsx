@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface VideoCardProps {
@@ -39,6 +39,37 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, vi
                 }}>
                     12:45
                 </div>
+                <div
+                    className="mini-player-btn"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.dispatchEvent(new CustomEvent('setMiniPlayer', { detail: id }));
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: 'rgba(0,0,0,0.6)',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        opacity: 0,
+                        transition: 'opacity 0.2s',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 5
+                    }}
+                    title="Play in Mini Player"
+                >
+                    <Maximize2 size={18} />
+                </div>
+                <style>{`
+                    .video-card:hover .mini-player-btn {
+                        opacity: 1 !important;
+                    }
+                `}</style>
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>

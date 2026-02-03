@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ThumbsUp, ThumbsDown, Share2, Download, MoreHorizontal } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Share2, Download, MoreHorizontal, Maximize2 } from 'lucide-react';
 import VideoCard from './VideoCard.tsx';
 import VideoPlayer from './VideoPlayer.tsx';
 import CommentSection from './CommentSection.tsx';
@@ -115,6 +115,17 @@ const WatchPage: React.FC = () => {
                         </button>
                         <button style={{ background: 'var(--surface)', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '50px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Download size={18} /> Download
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('setMiniPlayer', { detail: id }));
+                            }}
+                            style={{ background: 'var(--surface)', border: 'none', color: 'white', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}
+                            title="Mini Player"
+                        >
+                            <Maximize2 size={18} />
                         </button>
                         <button style={{ background: 'var(--surface)', border: 'none', color: 'white', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}>
                             <MoreHorizontal size={18} />
