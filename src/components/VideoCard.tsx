@@ -7,13 +7,22 @@ interface VideoCardProps {
     thumbnail: string;
     title: string;
     channel: string;
+    channelId?: string;
     views: string;
     timestamp: string;
     channelImage: string;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, views, timestamp, channelImage }) => {
+const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, channelId, views, timestamp, channelImage }) => {
     const navigate = useNavigate();
+
+    const handleChannelClick = (e: React.MouseEvent) => {
+        if (channelId) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate(`/channel/${channelId}`);
+        }
+    };
 
     return (
         <div
@@ -76,6 +85,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, vi
                 <img
                     src={channelImage}
                     alt={channel}
+                    onClick={handleChannelClick}
                     style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
                 />
                 <div style={{ flex: 1 }}>
@@ -92,7 +102,12 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, vi
                         {title}
                     </h3>
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                        <div style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.currentTarget.style.color = 'white')} onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}>
+                        <div
+                            onClick={handleChannelClick}
+                            style={{ transition: 'color 0.2s' }}
+                            onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
+                            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                        >
                             {channel}
                         </div>
                         <div>{views} views • {timestamp}</div>

@@ -12,6 +12,8 @@ import MiniPlayer from './components/MiniPlayer.tsx';
 import HistoryPage from './components/HistoryPage.tsx';
 import LikedVideosPage from './components/LikedVideosPage.tsx';
 import SubscriptionsPage from './components/SubscriptionsPage.tsx';
+import ChannelPage from './components/ChannelPage.tsx';
+import PlaylistPage from './components/PlaylistPage.tsx';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -48,6 +50,8 @@ const App: React.FC = () => {
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/liked-videos" element={<LikedVideosPage />} />
               <Route path="/subscriptions" element={<SubscriptionsPage />} />
+              <Route path="/channel/:channelId" element={<ChannelPage />} />
+              <Route path="/playlist/:playlistId" element={<PlaylistPage />} />
             </Routes>
           </main>
         </div>

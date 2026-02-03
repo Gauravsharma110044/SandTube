@@ -132,6 +132,7 @@ const VideoGrid: React.FC = () => {
                             thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
                             title={video.snippet.title}
                             channel={video.snippet.channelTitle}
+                            channelId={video.snippet.channelId}
                             views={formatViews(video.statistics?.viewCount)}
                             timestamp={getTimeAgo(video.snippet.publishedAt)}
                             channelImage={video.snippet.thumbnails.default.url}
