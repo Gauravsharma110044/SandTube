@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon, Music, Trophy, Newspaper, Gamepad2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getMySubscriptions } from '../services/youtube.ts';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -38,6 +39,22 @@ const SidebarItem: React.FC<{ icon: React.ReactNode; label: string; active?: boo
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [subscriptions, setSubscriptions] = useState<any[]>([]);
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    useEffect(() => {
+        const fetchSubs = async () => {
+            if (user?.accessToken) {
+                try {
+                    const subs = await getMySubscriptions(user.accessToken);
+                    setSubscriptions(subs);
+                } catch (error) {
+                    console.error("Error fetching subscriptions:", error);
+                }
+            }
+        };
+        fetchSubs();
+    }, [user?.accessToken]);
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -70,6 +87,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             <SidebarItem icon={<PlaySquare size={22} />} label="Your videos" />
             <SidebarItem icon={<Clock size={22} />} label="Watch later" />
             <SidebarItem icon={<ThumbsUp size={22} />} label="Liked videos" />
+
+            {user && subscriptions.length > 0 && (
+                <>
+                    <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
+                    <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>Subscriptions</div>
+                    {subscriptions.map(sub => (
+                        <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px 20px', cursor: 'pointer', borderRadius: '12px', margin: '2px 10px' }} className="sidebar-item">
+                            <img src={sub.snippet.thumbnails.default.url} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+                            <span style={{ fontSize: '0.9rem' }}>{sub.snippet.title}</span>
+                        </div>
+                    ))}
+                </>
+            )}
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
 

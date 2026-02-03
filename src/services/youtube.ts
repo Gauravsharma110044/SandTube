@@ -65,3 +65,45 @@ export const getChannelDetails = async (channelId: string) => {
     });
     return response.data.items[0];
 };
+
+// Authenticated Methods
+export const getMySubscriptions = async (accessToken: string) => {
+    const response = await axios.get(`${BASE_URL}/subscriptions`, {
+        params: {
+            part: 'snippet,contentDetails',
+            mine: true,
+            maxResults: 10
+        },
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+    return response.data.items;
+};
+
+export const getMyLikedVideos = async (accessToken: string) => {
+    const response = await axios.get(`${BASE_URL}/videos`, {
+        params: {
+            part: 'snippet,contentDetails,statistics',
+            myRating: 'like',
+            maxResults: 10
+        },
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+    return response.data.items;
+};
+
+export const getMyChannel = async (accessToken: string) => {
+    const response = await axios.get(`${BASE_URL}/channels`, {
+        params: {
+            part: 'snippet,statistics,contentDetails',
+            mine: true
+        },
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+    return response.data.items[0];
+};
