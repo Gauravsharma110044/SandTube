@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { LayoutGrid, List, Settings, Bell, MoreVertical } from 'lucide-react';
+import { LayoutGrid, List, Bell } from 'lucide-react';
 import { getMySubscriptions, getPopularVideos } from '../services/youtube.ts';
 import { useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
