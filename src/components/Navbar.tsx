@@ -281,6 +281,13 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                             >
                                 <img src={user.picture} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
+                            <button
+                                onClick={handleLogout}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                title="Logout"
+                            >
+                                <LogOut size={20} />
+                            </button>
                         </>
                     ) : (
                         <button
