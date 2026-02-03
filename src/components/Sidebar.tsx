@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon } from 'lucide-react';
+import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon, Music, Trophy, Newspaper, Gamepad2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
@@ -75,7 +75,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
             <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>Explore</div>
             <SidebarItem icon={<ExploreIcon size={22} />} label="Trending" />
-            {/* ... (keep other explore items) */}
+            <SidebarItem icon={<Music size={22} />} label="Music" />
+            <SidebarItem icon={<Trophy size={22} />} label="Gaming" />
+            <SidebarItem icon={<Newspaper size={22} />} label="News" />
+            <SidebarItem icon={<Gamepad2 size={22} />} label="Sports" />
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
 
