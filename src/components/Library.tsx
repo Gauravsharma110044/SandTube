@@ -7,12 +7,12 @@ const Library: React.FC = () => {
     const [likedVideos, setLikedVideos] = useState<any[]>([]);
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [localHistory, setLocalHistory] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     useEffect(() => {
         const fetchLibrary = async () => {
-            setLoading(true);
+
 
             // Fetch local history
             const history = JSON.parse(localStorage.getItem('sandtube_history') || '[]');
@@ -30,7 +30,7 @@ const Library: React.FC = () => {
                     console.error("Error fetching library data:", error);
                 }
             }
-            setLoading(false);
+
         };
         fetchLibrary();
     }, [user?.accessToken]);
