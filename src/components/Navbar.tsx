@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Menu, Search, Video, Bell, Mic, LogOut } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GoogleLogin, googleLogout } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
+import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import axios from 'axios';
 
 interface NavbarProps {
     onMenuClick: () => void;
@@ -13,24 +13,35 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user') || 'null'));
     const navigate = useNavigate();
 
+    const login = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                // Fetch profile info using the access token
+                const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+
+                const userData = {
+                    ...res.data,
+                    accessToken: tokenResponse.access_token
+                };
+
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+                window.location.reload(); // Refresh to update all components with the new token
+            } catch (err) {
+                console.error('Failed to fetch user profile', err);
+            }
+        },
+        scope: 'https://www.googleapis.com/auth/youtube.readonly',
+        onError: () => console.log('Login Failed'),
+    });
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             navigate(`/?search=${encodeURIComponent(searchQuery)}`);
         }
-    };
-
-    const handleLoginSuccess = (credentialResponse: any) => {
-        const decoded: any = jwtDecode(credentialResponse.credential);
-        const userData = {
-            name: decoded.name,
-            email: decoded.email,
-            picture: decoded.picture,
-            sub: decoded.sub
-        };
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-        console.log('Login Success:', userData);
     };
 
     const handleLogout = () => {
@@ -151,13 +162,13 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                         </div>
                     </>
                 ) : (
-                    <GoogleLogin
-                        onSuccess={handleLoginSuccess}
-                        onError={() => console.log('Login Failed')}
-                        useOneTap
-                        theme="filled_black"
-                        shape="circle"
-                    />
+                    <button
+                        onClick={() => login()}
+                        className="button-primary"
+                        style={{ padding: '8px 20px' }}
+                    >
+                        Sign In
+                    </button>
                 )}
             </div>
         </nav>
