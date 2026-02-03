@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown, Share2, Download, MoreHorizontal, Maximize2 } from 'lucide-react';
 import VideoCard from './VideoCard.tsx';
 import VideoPlayer from './VideoPlayer.tsx';
@@ -8,6 +8,7 @@ import { getVideoDetails, getRelatedVideos, getChannelDetails } from '../service
 
 const WatchPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [video, setVideo] = useState<any>(null);
     const [relatedVideos, setRelatedVideos] = useState<any[]>([]);
     const [channel, setChannel] = useState<any>(null);
@@ -82,10 +83,16 @@ const WatchPage: React.FC = () => {
                         <img
                             src={channel?.snippet?.thumbnails?.default?.url || "https://i.pravatar.cc/150"}
                             alt="Channel"
-                            style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                            onClick={() => navigate(`/channel/${video.snippet.channelId}`)}
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer' }}
                         />
                         <div>
-                            <div style={{ fontWeight: 'bold' }}>{video.snippet.channelTitle}</div>
+                            <div
+                                onClick={() => navigate(`/channel/${video.snippet.channelId}`)}
+                                style={{ fontWeight: 'bold', cursor: 'pointer' }}
+                            >
+                                {video.snippet.channelTitle}
+                            </div>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                 {formatCount(channel?.statistics?.subscriberCount)} subscribers
                             </div>
@@ -161,6 +168,7 @@ const WatchPage: React.FC = () => {
                         thumbnail={vid.snippet.thumbnails.high.url}
                         title={vid.snippet.title}
                         channel={vid.snippet.channelTitle}
+                        channelId={vid.snippet.channelId}
                         views="" // Search API doesn't return viewCount easily without another call
                         timestamp={new Date(vid.snippet.publishedAt).toLocaleDateString()}
                         channelImage={vid.snippet.thumbnails.default.url}

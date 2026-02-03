@@ -1,42 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { History, PlaySquare, Clock, ThumbsUp, ListVideo } from 'lucide-react';
+import { History, PlaySquare, Clock, ThumbsUp, ListVideo, User, Settings, Info } from 'lucide-react';
 import VideoCard from './VideoCard.tsx';
-import { getMyLikedVideos, getMyPlaylists } from '../services/youtube.ts';
+import { getMyLikedVideos, getMyPlaylists, getMyChannel } from '../services/youtube.ts';
+import { useNavigate } from 'react-router-dom';
 
 const Library: React.FC = () => {
+    const navigate = useNavigate();
     const [likedVideos, setLikedVideos] = useState<any[]>([]);
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [localHistory, setLocalHistory] = useState<any[]>([]);
+    const [myChannel, setMyChannel] = useState<any>(null);
 
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     useEffect(() => {
         const fetchLibrary = async () => {
-
-
             // Fetch local history
             const history = JSON.parse(localStorage.getItem('sandtube_history') || '[]');
             setLocalHistory(history);
 
             if (user?.accessToken) {
                 try {
-                    const [liked, myPlaylists] = await Promise.all([
+                    const [liked, myPlaylists, channel] = await Promise.all([
                         getMyLikedVideos(user.accessToken),
-                        getMyPlaylists(user.accessToken)
+                        getMyPlaylists(user.accessToken),
+                        getMyChannel(user.accessToken)
                     ]);
                     setLikedVideos(liked);
                     setPlaylists(myPlaylists);
+                    setMyChannel(channel);
                 } catch (error) {
                     console.error("Error fetching library data:", error);
                 }
             }
-
         };
         fetchLibrary();
     }, [user?.accessToken]);
 
     const formatViews = (views: string) => {
-        if (!views) return 'N/A';
+        if (!views) return '0';
         const num = parseInt(views);
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -55,118 +57,161 @@ const Library: React.FC = () => {
         return 'Today';
     };
 
-    const listItems = [
-        { icon: <History />, label: 'History', count: localHistory.length > 0 ? `${localHistory.length} videos` : 'Empty' },
-        { icon: <PlaySquare />, label: 'Your videos', count: 'Syncing...' },
-        { icon: <Clock />, label: 'Watch later', count: 'Private' },
-        { icon: <ThumbsUp />, label: 'Liked videos', count: likedVideos.length > 0 ? `${likedVideos.length} videos` : '0 videos' }
-    ];
-
     return (
-        <div style={{ animation: 'fadeIn 0.5s ease' }}>
-            {/* Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginBottom: '50px' }}>
-                {listItems.map((item, i) => (
-                    <div key={i} className="glass-morphism" style={{ padding: '25px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '15px', cursor: 'pointer', transition: 'transform 0.2s' }}>
-                        <div style={{ color: 'var(--primary)' }}>{item.icon}</div>
-                        <div>
-                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{item.label}</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.count}</div>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease', padding: '20px' }}>
+
+            {user && (
+                <div className="glass-morphism" style={{
+                    padding: '40px',
+                    borderRadius: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px',
+                    marginBottom: '50px',
+                    background: 'linear-gradient(135deg, rgba(230, 185, 120, 0.1), rgba(0,0,0,0.4))',
+                    border: '1px solid var(--primary-low)'
+                }}>
+                    <img
+                        src={user.picture}
+                        alt=""
+                        style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--primary)' }}
+                    />
+                    <div style={{ flex: 1 }}>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{user.name}</h1>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{user.email} • {myChannel?.snippet?.customUrl || 'Loading handle...'}</p>
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{likedVideos.length}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Likes</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{playlists.length}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Playlists</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{localHistory.length}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>History</div>
+                            </div>
                         </div>
                     </div>
-                ))}
-            </div>
+                    <button
+                        onClick={() => navigate('/settings')}
+                        style={{ background: 'var(--surface)', border: 'none', color: 'white', padding: '12px 25px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                    >
+                        <Settings size={18} /> Edit Profile
+                    </button>
+                </div>
+            )}
 
-            {/* History Section */}
-            <section style={{ marginBottom: '50px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '10px' }}><History size={24} /> Recent History</h2>
-                    <span onClick={() => {
-                        localStorage.removeItem('sandtube_history');
-                        setLocalHistory([]);
-                    }} style={{ color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer' }}>Clear all</span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                    {localHistory.length > 0 ? (
-                        localHistory.slice(0, 4).map((video) => (
-                            <VideoCard
-                                key={video.id + (video.watchedAt || '')}
-                                id={video.id}
-                                thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
-                                title={video.snippet.title}
-                                channel={video.snippet.channelTitle}
-                                views={formatViews(video.statistics?.viewCount)}
-                                timestamp={getTimeAgo(video.watchedAt || video.snippet.publishedAt)}
-                                channelImage={video.snippet.thumbnails.default.url}
-                            />
-                        ))
-                    ) : (
-                        <p style={{ color: 'var(--text-muted)' }}>No watch history found.</p>
-                    )}
-                </div>
-            </section>
+            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '40px' }}>
 
-            {/* Playlists Section */}
-            <section style={{ marginBottom: '50px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '10px' }}><ListVideo size={24} /> Playlists (Real)</h2>
-                    <span style={{ color: 'var(--primary)', fontSize: '0.9rem', cursor: 'pointer' }}>See all</span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                    {user ? (
-                        playlists.length > 0 ? (
-                            playlists.map(playlist => (
-                                <div key={playlist.id} className="glass-morphism" style={{ borderRadius: '15px', overflow: 'hidden', cursor: 'pointer' }}>
-                                    <div style={{ position: 'relative', aspectRatio: '16/9' }}>
-                                        <img src={playlist.snippet.thumbnails.high.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{playlist.contentDetails.itemCount}</span>
-                                            <ListVideo size={20} />
+                <div className="library-left">
+                    <section style={{ marginBottom: '60px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                            <h2 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <History size={28} style={{ color: 'var(--primary)' }} /> Recent History
+                            </h2>
+                            <button
+                                onClick={() => navigate('/history')}
+                                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 'bold', cursor: 'pointer' }}
+                            >
+                                SEE ALL
+                            </button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                            {localHistory.length > 0 ? (
+                                localHistory.slice(0, 4).map((video) => (
+                                    <VideoCard
+                                        key={video.id.videoId || video.id}
+                                        id={video.id.videoId || video.id}
+                                        thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
+                                        title={video.snippet.title}
+                                        channel={video.snippet.channelTitle}
+                                        channelId={video.snippet.channelId}
+                                        views={formatViews(video.statistics?.viewCount)}
+                                        timestamp={getTimeAgo(video.watchedAt || video.snippet.publishedAt)}
+                                        channelImage={video.snippet.thumbnails.default.url}
+                                    />
+                                ))
+                            ) : (
+                                <p style={{ color: 'var(--text-muted)' }}>No historical videos yet.</p>
+                            )}
+                        </div>
+                    </section>
+
+                    <section style={{ marginBottom: '60px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                            <h2 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <ListVideo size={28} style={{ color: 'var(--primary)' }} /> Playlists
+                            </h2>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                            {user ? (
+                                playlists.length > 0 ? (
+                                    playlists.map(playlist => (
+                                        <div
+                                            key={playlist.id}
+                                            className="playlist-card"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => navigate(`/playlist/${playlist.id}`)}
+                                        >
+                                            <div style={{ position: 'relative', aspectRatio: '16/9', borderRadius: '15px', overflow: 'hidden', marginBottom: '10px' }}>
+                                                <img src={playlist.snippet.thumbnails.high.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '35%', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                                    <span style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{playlist.contentDetails.itemCount}</span>
+                                                    <ListVideo size={24} />
+                                                </div>
+                                            </div>
+                                            <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>{playlist.snippet.title}</div>
                                         </div>
-                                    </div>
-                                    <div style={{ padding: '12px' }}>
-                                        <div style={{ fontWeight: 'bold', fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{playlist.snippet.title}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>View full playlist</div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p style={{ color: 'var(--text-muted)' }}>No playlists found.</p>
-                        )
-                    ) : (
-                        <p style={{ color: 'var(--text-muted)' }}>Sign in to see your playlists.</p>
-                    )}
+                                    ))
+                                ) : (
+                                    <p style={{ color: 'var(--text-muted)' }}>No playlists found.</p>
+                                )
+                            ) : (
+                                <p style={{ color: 'var(--text-muted)' }}>Sign in to see playlists.</p>
+                            )}
+                        </div>
+                    </section>
                 </div>
-            </section>
 
-            {/* Liked Videos Section */}
-            <section>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '10px' }}><ThumbsUp size={24} /> Liked Videos (Real)</h2>
+                <div className="library-right">
+                    <div className="glass-morphism" style={{ padding: '25px', borderRadius: '20px', position: 'sticky', top: '90px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div
+                                onClick={() => navigate('/history')}
+                                style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '12px', borderRadius: '12px', cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }}
+                            >
+                                <History size={20} /> History
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '12px', borderRadius: '12px', cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }}>
+                                <PlaySquare size={20} /> Your videos
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '12px', borderRadius: '12px', cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }}>
+                                <Clock size={20} /> Watch later
+                            </div>
+                            <div
+                                onClick={() => navigate('/liked-videos')}
+                                style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '12px', borderRadius: '12px', cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }}
+                            >
+                                <ThumbsUp size={20} /> Liked videos
+                            </div>
+                        </div>
+
+                        <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '20px 0' }} />
+
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Info size={14} /> Total watched: {localHistory.length}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <User size={14} /> Channel name: {user?.name || 'Guest'}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                    {user ? (
-                        likedVideos.length > 0 ? (
-                            likedVideos.slice(0, 4).map((video) => (
-                                <VideoCard
-                                    key={video.id}
-                                    id={video.id}
-                                    thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
-                                    title={video.snippet.title}
-                                    channel={video.snippet.channelTitle}
-                                    views={formatViews(video.statistics?.viewCount)}
-                                    timestamp={getTimeAgo(video.snippet.publishedAt)}
-                                    channelImage={video.snippet.thumbnails.default.url}
-                                />
-                            ))
-                        ) : (
-                            <p style={{ color: 'var(--text-muted)' }}>Loading your likes...</p>
-                        )
-                    ) : (
-                        <p style={{ color: 'var(--text-muted)' }}>Sign in to see your likes.</p>
-                    )}
-                </div>
-            </section>
+
+            </div>
         </div>
     );
 };

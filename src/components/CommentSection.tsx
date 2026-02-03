@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ThumbsUp, MessageSquare, MoreVertical, User } from 'lucide-react';
 import { getVideoComments } from '../services/youtube.ts';
 
@@ -7,6 +8,7 @@ interface CommentSectionProps {
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
+    const navigate = useNavigate();
     const [comments, setComments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [newComment, setNewComment] = useState('');
@@ -84,10 +86,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                         const comment = thread.snippet.topLevelComment.snippet;
                         return (
                             <div key={thread.id} style={{ display: 'flex', gap: '15px' }}>
-                                <img src={comment.authorProfileImageUrl} alt={comment.authorDisplayName} style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                                <img
+                                    src={comment.authorProfileImageUrl}
+                                    alt={comment.authorDisplayName}
+                                    onClick={() => navigate(`/channel/${comment.authorChannelId.value}`)}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer' }}
+                                />
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                        <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{comment.authorDisplayName}</span>
+                                        <span
+                                            onClick={() => navigate(`/channel/${comment.authorChannelId.value}`)}
+                                            style={{ fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer' }}
+                                        >
+                                            {comment.authorDisplayName}
+                                        </span>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{getTimeAgo(comment.publishedAt)}</span>
                                     </div>
                                     <p style={{ margin: '0 0 8px 0', fontSize: '0.95rem', lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: comment.textDisplay }} />

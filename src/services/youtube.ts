@@ -59,11 +59,24 @@ export const getRelatedVideos = async (videoId: string) => {
 export const getChannelDetails = async (channelId: string) => {
     const response = await youtube.get('/channels', {
         params: {
-            part: 'snippet,statistics',
+            part: 'snippet,statistics,brandingSettings',
             id: channelId
         }
     });
     return response.data.items[0];
+};
+
+export const getChannelVideos = async (channelId: string) => {
+    const response = await youtube.get('/search', {
+        params: {
+            part: 'snippet',
+            channelId: channelId,
+            order: 'date',
+            type: 'video',
+            maxResults: 20
+        }
+    });
+    return response.data.items;
 };
 
 // Authenticated Methods

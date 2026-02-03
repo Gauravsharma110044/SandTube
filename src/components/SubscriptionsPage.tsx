@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { History as SubIcon } from 'lucide-react';
+import { LayoutGrid, List, Settings, Bell, MoreVertical } from 'lucide-react';
 import { getMySubscriptions, getPopularVideos } from '../services/youtube.ts';
+import { useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
 
 const SubscriptionsPage: React.FC = () => {
+    const navigate = useNavigate();
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
     const [videos, setVideos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     useEffect(() => {
@@ -15,8 +18,7 @@ const SubscriptionsPage: React.FC = () => {
                 try {
                     const subs = await getMySubscriptions(user.accessToken);
                     setSubscriptions(subs);
-                    // For demo/sim, we fetch popular videos as "latest from subs" 
-                    // since fetching multiple channel videos individually hits quota hard
+                    // Fetch popular as a fallback for "latest from subs"
                     const popular = await getPopularVideos();
                     setVideos(popular);
                 } catch (error) {
@@ -37,36 +39,66 @@ const SubscriptionsPage: React.FC = () => {
     };
 
     return (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', animation: 'fadeIn 0.5s ease' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h1 style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    Latest from Subscriptions
-                </h1>
-                <div style={{ display: 'flex', gap: '15px' }}>
-                    <button style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}>Manage</button>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease', padding: '20px' }}>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Latest</h1>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    <button style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 'bold', cursor: 'pointer' }}>Manage</button>
+                    <div style={{ display: 'flex', background: 'var(--surface)', borderRadius: '10px', padding: '4px' }}>
+                        <button
+                            onClick={() => setViewType('grid')}
+                            style={{ padding: '8px', borderRadius: '8px', background: viewType === 'grid' ? 'var(--surface-hover)' : 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
+                        >
+                            <LayoutGrid size={20} />
+                        </button>
+                        <button
+                            onClick={() => setViewType('list')}
+                            style={{ padding: '8px', borderRadius: '8px', background: viewType === 'list' ? 'var(--surface-hover)' : 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}
+                        >
+                            <List size={20} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {!user ? (
-                <div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>
-                    <h2>Sign in to see your subscriptions.</h2>
+                <div style={{ textAlign: 'center', padding: '100px 0', border: '2px dashed var(--glass-border)', borderRadius: '24px' }}>
+                    <Bell size={64} style={{ marginBottom: '20px', color: 'var(--primary)' }} />
+                    <h2>Don't miss a thing</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '25px' }}>Sign in to see updates from your favorite YouTube channels</p>
+                    <button className="button-primary" style={{ padding: '12px 30px' }}>Sign In</button>
                 </div>
             ) : loading ? (
-                <div style={{ textAlign: 'center', padding: '100px 0' }}>Loading subscriptions...</div>
+                <div style={{ textAlign: 'center', padding: '100px 0' }}>Creating your personal feed...</div>
             ) : (
                 <>
-                    <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px', marginBottom: '30px', scrollbarWidth: 'none' }}>
+                    {/* Subscription Avatars Horizontal Bar */}
+                    <div style={{ display: 'flex', gap: '25px', overflowX: 'auto', paddingBottom: '30px', marginBottom: '40px', scrollbarWidth: 'none' }}>
                         {subscriptions.map(sub => (
-                            <div key={sub.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', minWidth: '80px', cursor: 'pointer' }}>
-                                <img src={sub.snippet.thumbnails.default.url} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%' }} />
-                                <span style={{ fontSize: '0.75rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap', width: '70px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <div
+                                key={sub.id}
+                                onClick={() => navigate(`/channel/${sub.snippet.resourceId.channelId}`)}
+                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', minWidth: '90px', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                className="sub-avatar"
+                            >
+                                <div style={{ position: 'relative' }}>
+                                    <img src={sub.snippet.thumbnails.default.url} alt="" style={{ width: '64px', height: '64px', borderRadius: '50%', border: '2px solid transparent', padding: '2px' }} className="avatar-img" />
+                                    <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', background: '#3ea6ff', borderRadius: '50%', border: '2px solid var(--bg-dark)' }} />
+                                </div>
+                                <span style={{ fontSize: '0.8rem', textAlign: 'center', color: 'white', whiteSpace: 'nowrap', width: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {sub.snippet.title}
                                 </span>
                             </div>
                         ))}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+                    <div style={{
+                        display: viewType === 'grid' ? 'grid' : 'flex',
+                        flexDirection: viewType === 'grid' ? 'unset' : 'column',
+                        gridTemplateColumns: viewType === 'grid' ? 'repeat(auto-fill, minmax(300px, 1fr))' : 'unset',
+                        gap: '30px'
+                    }}>
                         {videos.map((video) => (
                             <VideoCard
                                 key={video.id}
@@ -74,6 +106,7 @@ const SubscriptionsPage: React.FC = () => {
                                 thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
                                 title={video.snippet.title}
                                 channel={video.snippet.channelTitle}
+                                channelId={video.snippet.channelId}
                                 views={formatViews(video.statistics?.viewCount)}
                                 timestamp={new Date(video.snippet.publishedAt).toLocaleDateString()}
                                 channelImage={video.snippet.thumbnails.default.url}
@@ -82,6 +115,15 @@ const SubscriptionsPage: React.FC = () => {
                     </div>
                 </>
             )}
+
+            <style>{`
+                .sub-avatar:hover .avatar-img {
+                    border-color: var(--primary) !important;
+                }
+                .sub-avatar:hover {
+                    transform: translateY(-5px);
+                }
+            `}</style>
         </div>
     );
 };
