@@ -61,19 +61,16 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                     <Menu size={24} />
                 </button>
                 <Link to="/" style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                        width: '32px',
-                        height: '32px',
-                        background: 'var(--primary)',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transform: 'rotate(-10deg)',
-                        boxShadow: '0 0 15px rgba(226, 179, 90, 0.4)'
-                    }}>
-                        <Video size={18} color="#0a0a0a" fill="#0a0a0a" />
-                    </div>
+                    <img
+                        src="/logo.png"
+                        alt="SandTube Logo"
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '10px',
+                            boxShadow: '0 0 15px rgba(226, 179, 90, 0.4)'
+                        }}
+                    />
                     <span style={{ fontSize: '1.4rem', fontWeight: 'bold', letterSpacing: '-1px' }}>SandTube</span>
                 </Link>
             </div>
