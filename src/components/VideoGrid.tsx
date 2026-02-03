@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
-import { getPopularVideos, searchVideos } from '../services/youtube.ts';
+import { getPopularVideos } from '../services/youtube.ts';
 
 const categories = ["All", "Sand Art", "Tech", "Gaming", "Music", "Live", "Artificial Intelligence", "Deserts", "Architecture", "Minimalism", "Coding", "Gadgets", "Travel"];
 
@@ -11,22 +11,13 @@ const VideoGrid: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const searchParams = new URLSearchParams(location.search);
-    const currentQuery = searchParams.get('search') || "All";
+    const currentQuery = "All";
 
     useEffect(() => {
         const fetchVideos = async () => {
             setLoading(true);
             try {
-                const searchParams = new URLSearchParams(location.search);
-                const query = searchParams.get('search');
-
-                let fetchedVideos;
-                if (query && query !== "All") {
-                    fetchedVideos = await searchVideos(query);
-                } else {
-                    fetchedVideos = await getPopularVideos();
-                }
+                const fetchedVideos = await getPopularVideos();
                 setVideos(fetchedVideos);
             } catch (error) {
                 console.error("Error fetching videos:", error);
@@ -42,7 +33,7 @@ const VideoGrid: React.FC = () => {
         if (cat === "All") {
             navigate('/');
         } else {
-            navigate(`/?search=${encodeURIComponent(cat)}`);
+            navigate(`/search?q=${encodeURIComponent(cat)}`);
         }
     };
 
