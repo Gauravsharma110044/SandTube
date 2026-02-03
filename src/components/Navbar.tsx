@@ -62,7 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 </button>
                 <Link to="/" style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <img
-                        src="/logo.png"
+                        src="/logo.svg"
                         alt="SandTube Logo"
                         style={{
                             width: '40px',
