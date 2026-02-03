@@ -107,3 +107,15 @@ export const getMyChannel = async (accessToken: string) => {
     });
     return response.data.items[0];
 };
+
+export const getVideoComments = async (videoId: string) => {
+    const response = await youtube.get('/commentThreads', {
+        params: {
+            part: 'snippet,replies',
+            videoId: videoId,
+            maxResults: 50,
+            order: 'relevance'
+        }
+    });
+    return response.data.items;
+};

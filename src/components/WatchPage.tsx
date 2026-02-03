@@ -127,7 +127,7 @@ const WatchPage: React.FC = () => {
                     </div>
                 </div>
 
-                <CommentSection />
+                <CommentSection videoId={id} />
             </div>
 
             {/* Recommendations */}
