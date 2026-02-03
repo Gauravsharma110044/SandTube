@@ -1,5 +1,5 @@
 import React from 'react';
-import { History, PlaySquare, Clock, ThumbsUp, ChevronRight, ListVideo } from 'lucide-react';
+import { History, PlaySquare, Clock, ThumbsUp, ListVideo } from 'lucide-react';
 import VideoCard from './VideoCard.tsx';
 
 const Library: React.FC = () => {
@@ -34,6 +34,7 @@ const Library: React.FC = () => {
                     {[1, 2, 3, 4].map(i => (
                         <VideoCard
                             key={i}
+                            id={`history-${i}`}
                             thumbnail="https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&q=80&w=800"
                             title={`History Video ${i} - Modern Architecture`}
                             channel="Design Studio"
