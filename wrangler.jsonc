@@ -2,7 +2,6 @@
     "name": "sandtube",
     "compatibility_date": "2026-02-03",
     "assets": {
-        "directory": "./dist",
-        "binding": "ASSETS"
+        "directory": "./dist"
     }
 }
