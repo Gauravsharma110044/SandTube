@@ -119,3 +119,16 @@ export const getVideoComments = async (videoId: string) => {
     });
     return response.data.items;
 };
+
+export const getShorts = async () => {
+    const response = await youtube.get('/search', {
+        params: {
+            part: 'snippet',
+            q: '#shorts',
+            type: 'video',
+            videoDuration: 'short',
+            maxResults: 20
+        }
+    });
+    return response.data.items;
+};
