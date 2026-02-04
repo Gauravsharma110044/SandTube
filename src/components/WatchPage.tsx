@@ -369,7 +369,7 @@ const WatchPage: React.FC = () => {
                     </h1>
 
                     {/* Banner below title */}
-                    <AdBanner slot="watch_below_title" style={{ height: '60px', marginTop: '10px' }} />
+                    <AdBanner slot="3056171345" style={{ height: '60px', marginTop: '10px' }} />
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', flexWrap: 'wrap', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -556,7 +556,7 @@ const WatchPage: React.FC = () => {
                     marginBottom: '10px'
                 }}>
                     <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>ADVERTISEMENT</span>
-                    <AdBanner slot="watch_sidebar_ad" format="rectangle" style={{ height: '250px' }} />
+                    <AdBanner slot="3056171345" format="rectangle" style={{ height: '250px' }} />
                 </div>
 
                 {relatedVideos.map((vid, i) => (
