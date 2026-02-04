@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
 import { getPopularVideos } from '../services/youtube.ts';
+import BackendAPI from '../services/backend.ts';
 
 const categories = ["All", "Sand Art", "Tech", "Gaming", "Music", "Live", "Artificial Intelligence", "Deserts", "Architecture", "Minimalism", "Coding", "Gadgets", "Travel"];
 
@@ -17,8 +18,9 @@ const VideoGrid: React.FC = () => {
         const fetchVideos = async () => {
             setLoading(true);
             try {
-                const fetchedVideos = await getPopularVideos();
-                setVideos(fetchedVideos);
+                const youtubeVideos = await getPopularVideos();
+                const localVideos = await BackendAPI.getAllVideos();
+                setVideos([...localVideos, ...youtubeVideos]);
             } catch (error) {
                 console.error("Error fetching videos:", error);
             } finally {

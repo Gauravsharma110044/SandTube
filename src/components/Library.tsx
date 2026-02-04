@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { History, PlaySquare, Clock, ThumbsUp, ListVideo, User, Settings, Info } from 'lucide-react';
+import { History, PlaySquare, Clock, ThumbsUp, ListVideo, User, Settings, Info, Crown, Download } from 'lucide-react';
+import BackendAPI from '../services/backend.ts';
 import VideoCard from './VideoCard.tsx';
 import { getMyLikedVideos, getMyPlaylists, getMyChannel } from '../services/youtube.ts';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +10,9 @@ const Library: React.FC = () => {
     const [likedVideos, setLikedVideos] = useState<any[]>([]);
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [localHistory, setLocalHistory] = useState<any[]>([]);
+    const [offlineVideos, setOfflineVideos] = useState<any[]>([]);
+    const [isPremium, setIsPremium] = useState(false);
     const [myChannel, setMyChannel] = useState<any>(null);
-
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     useEffect(() => {
@@ -18,6 +20,15 @@ const Library: React.FC = () => {
             // Fetch local history
             const history = JSON.parse(localStorage.getItem('sandtube_history') || '[]');
             setLocalHistory(history);
+
+            if (user?.sub) {
+                const status = await BackendAPI.getPremiumStatus(user.sub);
+                setIsPremium(status);
+                if (status) {
+                    const offline = await BackendAPI.getOfflineVideos(user.sub);
+                    setOfflineVideos(offline);
+                }
+            }
 
             if (user?.accessToken) {
                 try {
@@ -135,6 +146,50 @@ const Library: React.FC = () => {
                                 ))
                             ) : (
                                 <p style={{ color: 'var(--text-muted)' }}>No historical videos yet.</p>
+                            )}
+                        </div>
+                    </section>
+
+                    <section style={{ marginBottom: '60px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                            <h2 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <Download size={28} style={{ color: isPremium ? '#FFD700' : 'var(--primary)' }} /> Offline Downloads
+                            </h2>
+                            {!isPremium && (
+                                <button
+                                    onClick={() => navigate('/premium')}
+                                    style={{ background: 'rgba(255, 215, 0, 0.1)', border: '1px solid #FFD700', color: '#FFD700', padding: '6px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
+                                    GET PREMIUM
+                                </button>
+                            )}
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                            {isPremium ? (
+                                offlineVideos.length > 0 ? (
+                                    offlineVideos.map((video) => (
+                                        <VideoCard
+                                            key={video.id.videoId || video.id}
+                                            id={video.id.videoId || video.id}
+                                            thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
+                                            title={video.snippet.title}
+                                            channel={video.snippet.channelTitle}
+                                            channelId={video.snippet.channelId}
+                                            views={formatViews(video.statistics?.viewCount)}
+                                            timestamp={getTimeAgo(video.downloadedAt || video.snippet.publishedAt)}
+                                            channelImage={video.snippet.thumbnails.default.url}
+                                        />
+                                    ))
+                                ) : (
+                                    <p style={{ color: 'var(--text-muted)' }}>No offline videos. Start downloading!</p>
+                                )
+                            ) : (
+                                <div className="glass-card" style={{ padding: '30px', textAlign: 'center', gridColumn: '1 / -1' }}>
+                                    <Crown size={40} color="#FFD700" style={{ marginBottom: '15px' }} />
+                                    <h3>Offline Viewing is a Premium Feature</h3>
+                                    <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>Save your favorite videos for when you're on the go.</p>
+                                    <button className="button-primary" onClick={() => navigate('/premium')}>Upgrade to Premium</button>
+                                </div>
                             )}
                         </div>
                     </section>

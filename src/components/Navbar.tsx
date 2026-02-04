@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Search, Video, Bell, LogOut, Clock, ArrowLeft } from 'lucide-react';
+import { Menu, Search, Video, Bell, LogOut, Clock, ArrowLeft, Crown } from 'lucide-react';
+import BackendAPI from '../services/backend.ts';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import axios from 'axios';
@@ -18,8 +19,25 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     const [isSearchVisibleMobile, setIsSearchVisibleMobile] = useState(false);
     const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user') || 'null'));
     const [showNotifications, setShowNotifications] = useState(false);
+    const [isPremium, setIsPremium] = useState(false);
     const navigate = useNavigate();
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const suggestionsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (user?.sub) {
+            const unsubscribe = BackendAPI.subscribeToPremiumStatus(user.sub, (active) => {
+                setIsPremium(active);
+            });
+            return () => unsubscribe();
+        }
+    }, [user?.sub]);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -117,13 +135,15 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         }}>
             {/* Logo Section */}
             {!isSearchVisibleMobile && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <button
-                        onClick={onMenuClick}
-                        style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '8px', borderRadius: '50%' }}
-                    >
-                        <Menu size={24} />
-                    </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
+                    {!isMobile && (
+                        <button
+                            onClick={onMenuClick}
+                            style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '8px', borderRadius: '50%' }}
+                        >
+                            <Menu size={24} />
+                        </button>
+                    )}
                     <Link to="/" style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <img
                             src="/logo.svg"
@@ -136,6 +156,15 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                             }}
                         />
                         <span className="desktop-only" style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '-1px' }}>SandTube</span>
+                        {isPremium && (
+                            <span style={{
+                                fontSize: '0.65rem', background: '#FFD700', color: 'black',
+                                padding: '2px 4px', borderRadius: '4px', fontWeight: 'bold',
+                                marginLeft: '2px', alignSelf: 'flex-start', marginTop: '4px'
+                            }}>
+                                PREMIUM
+                            </span>
+                        )}
                     </Link>
                 </div>
             )}
@@ -265,7 +294,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                                 size={24}
                                 className="desktop-only"
                                 style={{ cursor: 'pointer' }}
-                                onClick={() => navigate('/upload')}
+                                onClick={() => navigate('/studio')}
                             />
                             <div style={{ position: 'relative' }}>
                                 <Bell
@@ -277,9 +306,14 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                             </div>
                             <div
                                 onClick={() => navigate('/settings')}
-                                style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--primary)', cursor: 'pointer' }}
+                                style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: `2px solid ${isPremium ? '#FFD700' : 'var(--primary)'}`, cursor: 'pointer', position: 'relative' }}
                             >
                                 <img src={user.picture} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                {isPremium && (
+                                    <div style={{ position: 'absolute', top: -1, right: -1, background: '#FFD700', borderRadius: '50%', padding: '2px', boxShadow: '0 0 5px rgba(0,0,0,0.5)' }}>
+                                        <Crown size={8} color="black" fill="black" />
+                                    </div>
+                                )}
                             </div>
                             <button
                                 onClick={handleLogout}

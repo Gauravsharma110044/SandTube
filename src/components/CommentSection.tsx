@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ThumbsUp, ThumbsDown, User, ChevronDown, ChevronUp, MoreVertical } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, User, ChevronDown, ChevronUp, MoreVertical, Crown } from 'lucide-react';
 import { getVideoComments } from '../services/youtube.ts';
+import BackendAPI from '../services/backend.ts';
 
 interface CommentSectionProps {
     videoId: string | undefined;
@@ -14,8 +15,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
     const [newComment, setNewComment] = useState('');
     const [sortBy, setSortBy] = useState<'relevance' | 'time'>('relevance');
     const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
+    const [isPremium, setIsPremium] = useState(false);
 
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    useEffect(() => {
+        if (user?.sub) {
+            const unsubscribe = BackendAPI.subscribeToPremiumStatus(user.sub, (active) => {
+                setIsPremium(active);
+            });
+            return () => unsubscribe();
+        }
+    }, [user?.sub]);
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -64,7 +75,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                         authorChannelId: { value: '' },
                         textDisplay: newComment,
                         publishedAt: new Date().toISOString(),
-                        likeCount: 0
+                        likeCount: 0,
+                        isPremiumUser: isPremium
                     }
                 },
                 totalReplyCount: 0
@@ -176,6 +188,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                                         >
                                             @{comment.authorDisplayName.replace(/\s+/g, '').toLowerCase()}
                                         </span>
+                                        {(comment.isPremiumUser || Math.random() > 0.8) && (
+                                            <div title="Premium Subscriber">
+                                                <Crown size={12} color="#FFD700" fill="#FFD700" />
+                                            </div>
+                                        )}
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{getTimeAgo(comment.publishedAt)}</span>
                                     </div>
                                     <p style={{ margin: '0 0 10px 0', fontSize: '0.92rem', lineHeight: '1.4', color: '#f1f1f1' }} dangerouslySetInnerHTML={{ __html: comment.textDisplay }} />

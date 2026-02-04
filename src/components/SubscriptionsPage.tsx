@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LayoutGrid, List, Bell } from 'lucide-react';
 import { getMySubscriptions, getPopularVideos } from '../services/youtube.ts';
+import BackendAPI from '../services/backend.ts';
 import { useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
 
@@ -14,21 +15,53 @@ const SubscriptionsPage: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (user?.accessToken) {
-                try {
-                    const subs = await getMySubscriptions(user.accessToken);
-                    setSubscriptions(subs);
-                    // Fetch popular as a fallback for "latest from subs"
+            let youtubeSubs: any[] = [];
+            let localSubs: string[] = [];
+            let combinedVideos: any[] = [];
+
+            try {
+                // Fetch YouTube Subscriptions
+                if (user?.accessToken) {
+                    youtubeSubs = await getMySubscriptions(user.accessToken);
                     const popular = await getPopularVideos();
-                    setVideos(popular);
-                } catch (error) {
-                    console.error("Error fetching subscriptions data:", error);
+                    combinedVideos = [...popular];
                 }
+
+                // Fetch Local Subscriptions
+                if (user?.sub) {
+                    localSubs = await BackendAPI.getUserSubscriptions(user.sub);
+
+                    // Convert local sub IDs to displayable objects
+                    const localSubDetails = await Promise.all(localSubs.map(async (subId) => {
+                        // For now using mock details for local subs, or could fetch from a 'channels' node
+                        return {
+                            id: subId,
+                            snippet: {
+                                title: 'Local Creator',
+                                thumbnails: { default: { url: 'https://i.pravatar.cc/150?u=' + subId } },
+                                resourceId: { channelId: subId }
+                            }
+                        };
+                    }));
+
+                    // Fetch videos from local subs
+                    const localVideosPromises = localSubs.map(subId => BackendAPI.getVideosByChannel(subId));
+                    const localVideosResults = await Promise.all(localVideosPromises);
+                    const localVideos = localVideosResults.flat();
+
+                    setSubscriptions([...localSubDetails, ...youtubeSubs]);
+                    setVideos([...localVideos, ...combinedVideos]);
+                } else {
+                    setSubscriptions(youtubeSubs);
+                    setVideos(combinedVideos);
+                }
+            } catch (error) {
+                console.error("Error fetching subscriptions data:", error);
             }
             setLoading(false);
         };
         fetchData();
-    }, [user?.accessToken]);
+    }, [user?.accessToken, user?.sub]);
 
     const formatViews = (views: string) => {
         if (!views) return 'N/A';

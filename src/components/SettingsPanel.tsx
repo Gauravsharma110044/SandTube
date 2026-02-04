@@ -108,6 +108,63 @@ const SettingsPanel: React.FC = () => {
                             </div>
                         </div>
                     )}
+                    {activeTab === 'appearance' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                            <div>
+                                <h3 style={{ marginBottom: '15px' }}>Device Layout</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '20px' }}>Choose how you'd like SandTube to look on this device.</p>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div
+                                        onClick={() => {
+                                            localStorage.setItem('sandtube_layout', 'responsive');
+                                            window.location.reload();
+                                        }}
+                                        style={{
+                                            padding: '20px',
+                                            borderRadius: '16px',
+                                            border: '2px solid ' + (localStorage.getItem('sandtube_layout') !== 'desktop' ? 'var(--primary)' : 'var(--glass-border)'),
+                                            background: 'var(--bg-dark)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            gap: '10px'
+                                        }}
+                                    >
+                                        <Monitor size={40} color={localStorage.getItem('sandtube_layout') !== 'desktop' ? 'var(--primary)' : 'white'} />
+                                        <div style={{ fontWeight: '600' }}>Responsive (Auto)</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>Switches between mobile/desktop based on screen size.</div>
+                                    </div>
+
+                                    <div
+                                        onClick={() => {
+                                            localStorage.setItem('sandtube_layout', 'desktop');
+                                            window.location.reload();
+                                        }}
+                                        style={{
+                                            padding: '20px',
+                                            borderRadius: '16px',
+                                            border: '2px solid ' + (localStorage.getItem('sandtube_layout') === 'desktop' ? 'var(--primary)' : 'var(--glass-border)'),
+                                            background: 'var(--bg-dark)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            gap: '10px'
+                                        }}
+                                    >
+                                        <div style={{ position: 'relative' }}>
+                                            <Monitor size={40} color={localStorage.getItem('sandtube_layout') === 'desktop' ? 'var(--primary)' : 'white'} />
+                                            <div style={{ position: 'absolute', top: -5, right: -5, background: 'var(--primary)', color: 'black', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>PRO</div>
+                                        </div>
+                                        <div style={{ fontWeight: '600' }}>Always Desktop</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>Forces the desktop interface even on mobile devices.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
