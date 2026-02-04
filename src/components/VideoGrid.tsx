@@ -101,7 +101,7 @@ const VideoGrid: React.FC = () => {
             </div>
 
             {/* Top Banner Ad */}
-            <AdBanner slot="home_top_banner" style={{ height: '90px', marginBottom: '30px' }} />
+            <AdBanner slot="3056171345" style={{ height: '90px', marginBottom: '30px' }} />
 
             {/* Video Grid */}
             <div className="responsive-grid" style={{
@@ -132,7 +132,7 @@ const VideoGrid: React.FC = () => {
                                     border: '1px solid var(--glass-border)'
                                 }}>
                                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '10px' }}>SPONSORED</span>
-                                    <AdBanner slot={`home_grid_ad_${index}`} format="rectangle" style={{ height: '250px' }} />
+                                    <AdBanner slot="3056171345" format="rectangle" style={{ height: '250px' }} />
                                 </div>
                             )}
                             <VideoCard

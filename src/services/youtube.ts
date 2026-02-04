@@ -10,29 +10,86 @@ const youtube = axios.create({
     }
 });
 
+// Mock Data for Fallback
+const MOCK_VIDEOS = [
+    {
+        id: "v1_mock",
+        snippet: {
+            title: "Expert Sand Art: Creating a Desert Oasis",
+            channelTitle: "Sand Master",
+            channelId: "ch1",
+            publishedAt: new Date().toISOString(),
+            thumbnails: { high: { url: "https://images.unsplash.com/photo-1509316785289-025f5d846b35?w=800" }, default: { url: "https://i.pravatar.cc/150?u=ch1" } },
+            description: "Amazing sand art demonstration."
+        },
+        statistics: { viewCount: "125000" },
+        contentDetails: { duration: "PT5M30S" }
+    },
+    {
+        id: "v2_mock",
+        snippet: {
+            title: "Miniature Sand Sculptures - Step by Step",
+            channelTitle: "Grain by Grain",
+            channelId: "ch2",
+            publishedAt: new Date().toISOString(),
+            thumbnails: { high: { url: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800" }, default: { url: "https://i.pravatar.cc/150?u=ch2" } },
+            description: "Learn how to make tiny sand castles."
+        },
+        statistics: { viewCount: "89000" },
+        contentDetails: { duration: "PT12M45S" }
+    },
+    {
+        id: "v3_mock",
+        snippet: {
+            title: "The Physics of Sand: Why it Flows",
+            channelTitle: "Science of Sand",
+            channelId: "ch3",
+            publishedAt: new Date().toISOString(),
+            thumbnails: { high: { url: "https://images.unsplash.com/photo-1533240332313-0db49b459ad0?w=800" }, default: { url: "https://i.pravatar.cc/150?u=ch3" } },
+            description: "Exploring the interesting properties of sand grains."
+        },
+        statistics: { viewCount: "450000" },
+        contentDetails: { duration: "PT8M15S" }
+    }
+];
+
 export const getPopularVideos = async () => {
-    const response = await youtube.get('/videos', {
-        params: {
-            part: 'snippet,contentDetails,statistics',
-            chart: 'mostPopular',
-            maxResults: 20,
-            regionCode: 'US'
-        }
-    });
-    return response.data.items;
+    try {
+        const response = await youtube.get('/videos', {
+            params: {
+                part: 'snippet,contentDetails,statistics',
+                chart: 'mostPopular',
+                maxResults: 20,
+                regionCode: 'US'
+            }
+        });
+        return response.data.items;
+    } catch (error: any) {
+        console.error("YouTube API Error (Popular):", error.response?.data?.error?.message || error.message);
+        return MOCK_VIDEOS; // Fallback to mock data
+    }
 };
 
 export const searchVideos = async (query: string, filters: any = {}) => {
-    const response = await youtube.get('/search', {
-        params: {
-            part: 'snippet',
-            q: query,
-            type: 'video',
-            maxResults: 20,
-            ...filters
-        }
-    });
-    return response.data.items;
+    try {
+        const response = await youtube.get('/search', {
+            params: {
+                part: 'snippet',
+                q: query,
+                type: 'video',
+                maxResults: 20,
+                ...filters
+            }
+        });
+        return response.data.items;
+    } catch (error: any) {
+        console.error("YouTube API Error (Search):", error.response?.data?.error?.message || error.message);
+        // Filter mock results for basic search fallback
+        return MOCK_VIDEOS.filter(v =>
+            v.snippet.title.toLowerCase().includes(query.toLowerCase()) ||
+            query === "All" || query.length < 3
+        ).map(v => ({ ...v, id: { videoId: v.id } }));
+    }
 };
 
 export const getEnrichedSearchResults = async (query: string, filters: any = {}) => {
@@ -74,48 +131,71 @@ export const getSearchSuggestions = async (query: string) => {
 };
 
 export const getVideoDetails = async (videoId: string) => {
-    const response = await youtube.get('/videos', {
-        params: {
-            part: 'snippet,contentDetails,statistics',
-            id: videoId
-        }
-    });
-    return response.data.items[0];
+    try {
+        const response = await youtube.get('/videos', {
+            params: {
+                part: 'snippet,contentDetails,statistics',
+                id: videoId
+            }
+        });
+        return response.data.items[0];
+    } catch (error: any) {
+        console.error("YouTube API Error (VideoDetails):", error.response?.data?.error?.message || error.message);
+        // Fallback for mock videos if they are opened directly
+        const mock = MOCK_VIDEOS.find(v => v.id === videoId);
+        return mock || null;
+    }
 };
 
 export const getRelatedVideos = async (videoId: string) => {
-    const response = await youtube.get('/search', {
-        params: {
-            part: 'snippet',
-            relatedToVideoId: videoId,
-            type: 'video',
-            maxResults: 10
-        }
-    });
-    return response.data.items;
+    try {
+        const response = await youtube.get('/search', {
+            params: {
+                part: 'snippet',
+                relatedToVideoId: videoId,
+                type: 'video',
+                maxResults: 10
+            }
+        });
+        return response.data.items || [];
+    } catch (error: any) {
+        console.error("YouTube API Error (Related):", error.response?.data?.error?.message || error.message);
+        // Fallback: return popular videos as "related"
+        return MOCK_VIDEOS.map(v => ({ ...v, id: { videoId: v.id } }));
+    }
 };
 
 export const getChannelDetails = async (channelId: string) => {
-    const response = await youtube.get('/channels', {
-        params: {
-            part: 'snippet,statistics,brandingSettings',
-            id: channelId
-        }
-    });
-    return response.data.items[0];
+    try {
+        const response = await youtube.get('/channels', {
+            params: {
+                part: 'snippet,statistics,brandingSettings',
+                id: channelId
+            }
+        });
+        return response.data.items[0] || null;
+    } catch (error: any) {
+        console.error("YouTube API Error (ChannelDetails):", error.response?.data?.error?.message || error.message);
+        return null;
+    }
 };
 
 export const getChannelVideos = async (channelId: string) => {
-    const response = await youtube.get('/search', {
-        params: {
-            part: 'snippet',
-            channelId: channelId,
-            order: 'date',
-            type: 'video',
-            maxResults: 20
-        }
-    });
-    return response.data.items;
+    try {
+        const response = await youtube.get('/search', {
+            params: {
+                part: 'snippet',
+                channelId: channelId,
+                order: 'date',
+                type: 'video',
+                maxResults: 20
+            }
+        });
+        return response.data.items || [];
+    } catch (error: any) {
+        console.error("YouTube API Error (ChannelVideos):", error.response?.data?.error?.message || error.message);
+        return [];
+    }
 };
 
 // Authenticated Methods
@@ -200,46 +280,58 @@ export const getMyActivities = async (accessToken: string) => {
 };
 
 export const getVideoComments = async (videoId: string) => {
-    const response = await youtube.get('/commentThreads', {
-        params: {
-            part: 'snippet,replies',
-            videoId: videoId,
-            maxResults: 50,
-            order: 'relevance'
-        }
-    });
-    return response.data.items;
+    try {
+        const response = await youtube.get('/commentThreads', {
+            params: {
+                part: 'snippet,replies',
+                videoId: videoId,
+                maxResults: 50,
+                order: 'relevance'
+            }
+        });
+        return response.data.items;
+    } catch (error: any) {
+        console.error("YouTube API Error (Comments):", error.response?.data?.error?.message || error.message);
+        return [];
+    }
 };
 
 export const getShorts = async () => {
-    const response = await youtube.get('/search', {
-        params: {
-            part: 'snippet',
-            q: '#shorts sand art',
-            type: 'video',
-            videoDuration: 'short',
-            maxResults: 10
-        }
-    });
+    try {
+        const response = await youtube.get('/search', {
+            params: {
+                part: 'snippet',
+                q: '#shorts sand art',
+                type: 'video',
+                videoDuration: 'short',
+                maxResults: 10
+            }
+        });
 
-    const searchItems = response.data.items;
-    const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
+        const searchItems = response.data.items;
+        if (!searchItems || searchItems.length === 0) return [];
 
-    const statsResponse = await youtube.get('/videos', {
-        params: {
-            part: 'statistics,contentDetails',
-            id: videoIds
-        }
-    });
+        const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
 
-    const videoDetails = statsResponse.data.items;
+        const statsResponse = await youtube.get('/videos', {
+            params: {
+                part: 'statistics,contentDetails',
+                id: videoIds
+            }
+        });
 
-    return searchItems.map((item: any) => {
-        const details = videoDetails.find((v: any) => v.id === item.id.videoId);
-        return {
-            ...item,
-            statistics: details?.statistics,
-            contentDetails: details?.contentDetails
-        };
-    });
+        const videoDetails = statsResponse.data.items;
+
+        return searchItems.map((item: any) => {
+            const details = videoDetails.find((v: any) => v.id === item.id.videoId);
+            return {
+                ...item,
+                statistics: details?.statistics,
+                contentDetails: details?.contentDetails
+            };
+        });
+    } catch (error: any) {
+        console.error("YouTube API Error (Shorts):", error.response?.data?.error?.message || error.message);
+        return [];
+    }
 };

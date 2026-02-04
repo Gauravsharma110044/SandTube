@@ -196,10 +196,13 @@ const SearchPage: React.FC = () => {
                 </div>
             ) : videos.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {videos.map((video) => (
+                    {videos.map((video, index) => (
                         <div
-                            key={video.id.videoId}
-                            onClick={() => navigate(`/watch/${video.id.videoId}`)}
+                            key={video.id.videoId || (typeof video.id === 'string' ? video.id : video.id.playlistId) || index}
+                            onClick={() => {
+                                const vId = video.id.videoId || (typeof video.id === 'string' ? video.id : '');
+                                if (vId) navigate(`/watch/${vId}`);
+                            }}
                             style={{ display: 'flex', gap: '15px', cursor: 'pointer' }}
                             className="search-result-card"
                         >
