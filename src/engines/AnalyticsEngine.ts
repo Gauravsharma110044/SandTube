@@ -49,7 +49,7 @@ interface RealtimeMetrics {
     viewsLast30d: number;
     recentActivity: {
         timestamp: number;
-        type: 'view' | 'like' | 'comment' | 'subscribe';
+        type: 'view' | 'like' | 'comment' | 'subscribe' | 'dislike' | 'share';
         videoId?: string;
     }[];
 }
@@ -90,7 +90,7 @@ export class AnalyticsEngine {
     /**
      * Track video view
      */
-    public trackView(videoId: string, watchDuration: number, userId?: string): void {
+    public trackView(videoId: string, watchDuration: number, _userId?: string): void {
         let metrics = this.videoMetrics.get(videoId) || this.createDefaultVideoMetrics(videoId);
 
         metrics.views++;
@@ -134,7 +134,7 @@ export class AnalyticsEngine {
         }
 
         this.videoMetrics.set(videoId, metrics);
-        this.updateRealtimeMetrics(videoId, type);
+        this.updateRealtimeMetrics(videoId, type as any);
         this.saveAnalytics();
     }
 
@@ -218,7 +218,7 @@ export class AnalyticsEngine {
      */
     private updateRealtimeMetrics(
         videoId: string,
-        type: 'view' | 'like' | 'comment' | 'subscribe'
+        type: 'view' | 'like' | 'comment' | 'subscribe' | 'dislike' | 'share'
     ): void {
         let metrics = this.realtimeData.get(videoId) || {
             currentViewers: 0,
@@ -264,7 +264,7 @@ export class AnalyticsEngine {
     /**
      * Generate revenue report
      */
-    public generateRevenueReport(channelId: string, period: 'day' | 'week' | 'month'): number {
+    public generateRevenueReport(channelId: string, _period: 'day' | 'week' | 'month'): number {
         const metrics = this.getChannelAnalytics(channelId);
         const cpm = 2.5; // Cost per thousand views
         const revenue = (metrics.totalViews / 1000) * cpm;

@@ -37,7 +37,6 @@ export class ModerationEngine {
     private rules: ModerationRule[] = [];
     private actions: ModerationAction[] = [];
     private blockedWords: Set<string> = new Set();
-    private allowedWords: Set<string> = new Set();
     private spamPatterns: RegExp[] = [];
 
     constructor() {
@@ -174,7 +173,7 @@ export class ModerationEngine {
     public moderateComment(
         commentId: string,
         text: string,
-        authorId: string
+        _authorId: string
     ): { allowed: boolean; reason?: string; action?: ModerationAction } {
         // Analyze toxicity
         const toxicity = this.analyzeToxicity(text);
@@ -361,7 +360,7 @@ export class ModerationEngine {
      * Check for copyright infringement (simplified)
      */
     public checkCopyright(
-        videoId: string,
+        _videoId: string,
         metadata: { title: string; description: string }
     ): { infringing: boolean; matches: string[] } {
         // This would integrate with a copyright detection service
@@ -390,7 +389,7 @@ export class ModerationEngine {
         contentId: string,
         contentType: 'video' | 'comment',
         reason: string,
-        reporterId: string
+        _reporterId: string
     ): ModerationAction {
         return this.createAction(
             contentId,

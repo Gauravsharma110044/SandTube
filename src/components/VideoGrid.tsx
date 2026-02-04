@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import VideoCard from './VideoCard.tsx';
+import AdBanner from './AdBanner.tsx';
 import { getPopularVideos } from '../services/youtube.ts';
 import BackendAPI from '../services/backend.ts';
 
@@ -99,6 +100,9 @@ const VideoGrid: React.FC = () => {
                 ))}
             </div>
 
+            {/* Top Banner Ad */}
+            <AdBanner slot="home_top_banner" style={{ height: '90px', marginBottom: '30px' }} />
+
             {/* Video Grid */}
             <div className="responsive-grid" style={{
                 marginTop: '10px'
@@ -117,18 +121,31 @@ const VideoGrid: React.FC = () => {
                         </div>
                     ))
                 ) : (
-                    videos.map((video) => (
-                        <VideoCard
-                            key={video.id.videoId || video.id}
-                            id={video.id.videoId || video.id}
-                            thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
-                            title={video.snippet.title}
-                            channel={video.snippet.channelTitle}
-                            channelId={video.snippet.channelId}
-                            views={formatViews(video.statistics?.viewCount)}
-                            timestamp={getTimeAgo(video.snippet.publishedAt)}
-                            channelImage={video.snippet.thumbnails.default.url}
-                        />
+                    videos.map((video, index) => (
+                        <React.Fragment key={video.id.videoId || video.id}>
+                            {index > 0 && index % 8 === 0 && (
+                                <div style={{
+                                    gridColumn: '1 / -1',
+                                    background: 'var(--surface)',
+                                    padding: '20px',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--glass-border)'
+                                }}>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '10px' }}>SPONSORED</span>
+                                    <AdBanner slot={`home_grid_ad_${index}`} format="rectangle" style={{ height: '250px' }} />
+                                </div>
+                            )}
+                            <VideoCard
+                                id={video.id.videoId || video.id}
+                                thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
+                                title={video.snippet.title}
+                                channel={video.snippet.channelTitle}
+                                channelId={video.snippet.channelId}
+                                views={formatViews(video.statistics?.viewCount)}
+                                timestamp={getTimeAgo(video.snippet.publishedAt)}
+                                channelImage={video.snippet.thumbnails.default.url}
+                            />
+                        </React.Fragment>
                     ))
                 )}
             </div>

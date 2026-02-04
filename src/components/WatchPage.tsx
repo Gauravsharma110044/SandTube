@@ -5,6 +5,7 @@ import VideoCard from './VideoCard.tsx';
 import VideoPlayer from './VideoPlayer.tsx';
 import CommentSection from './CommentSection.tsx';
 import PlaylistModal from './PlaylistModal.tsx';
+import AdBanner from './AdBanner.tsx';
 import { getVideoDetails, getRelatedVideos, getChannelDetails } from '../services/youtube.ts';
 import { analyticsEngine, socialEngine, notificationEngine } from '../engines/index.ts';
 import BackendAPI from '../services/backend.ts';
@@ -367,6 +368,9 @@ const WatchPage: React.FC = () => {
                         {video.snippet.title}
                     </h1>
 
+                    {/* Banner below title */}
+                    <AdBanner slot="watch_below_title" style={{ height: '60px', marginTop: '10px' }} />
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', flexWrap: 'wrap', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <img
@@ -542,6 +546,19 @@ const WatchPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Watch Page Sidebar Ad */}
+                <div style={{
+                    background: 'var(--surface)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--glass-border)',
+                    marginBottom: '10px'
+                }}>
+                    <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>ADVERTISEMENT</span>
+                    <AdBanner slot="watch_sidebar_ad" format="rectangle" style={{ height: '250px' }} />
+                </div>
+
                 {relatedVideos.map((vid, i) => (
                     <VideoCard
                         key={i}
@@ -559,7 +576,7 @@ const WatchPage: React.FC = () => {
             </div>
 
             {showPlaylistModal && <PlaylistModal videoId={id || ''} onClose={() => setShowPlaylistModal(false)} />}
-        </div>
+        </div >
     );
 };
 
