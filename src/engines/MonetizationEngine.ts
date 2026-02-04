@@ -43,7 +43,6 @@ export class MonetizationEngine {
     // Revenue rates (in USD)
     private readonly CPM = 2.5; // Cost per thousand impressions
     private readonly CPC = 0.25; // Cost per click
-    private readonly MEMBERSHIP_PRICE = 4.99;
     private readonly PLATFORM_CUT = 0.30; // 30% platform fee
 
     constructor() {
@@ -214,8 +213,8 @@ export class MonetizationEngine {
     public processSuperChat(
         videoId: string,
         amount: number,
-        message: string,
-        userId: string
+        _message: string,
+        _userId: string
     ): { success: boolean; netAmount: number } {
         if (!this.settings.superChatEnabled) {
             return { success: false, netAmount: 0 };
@@ -232,7 +231,7 @@ export class MonetizationEngine {
      */
     public processMembership(
         channelId: string,
-        userId: string,
+        _userId: string,
         tier: 'basic' | 'premium' | 'elite' = 'basic'
     ): { success: boolean; monthlyRevenue: number } {
         if (!this.settings.membershipsEnabled) {
@@ -257,7 +256,7 @@ export class MonetizationEngine {
     public processMerchandiseSale(
         channelId: string,
         amount: number,
-        productId: string
+        _productId: string
     ): { success: boolean; netAmount: number } {
         if (!this.settings.merchandiseEnabled) {
             return { success: false, netAmount: 0 };
@@ -275,7 +274,7 @@ export class MonetizationEngine {
     public processSponsorshipDeal(
         videoId: string,
         amount: number,
-        sponsorName: string
+        _sponsorName: string
     ): void {
         this.updateVideoRevenue(videoId, 'sponsorships', amount);
     }
@@ -366,7 +365,7 @@ export class MonetizationEngine {
      */
     public generateRevenueReport(
         entityId: string,
-        period: 'day' | 'week' | 'month' | 'year'
+        _period: 'day' | 'week' | 'month' | 'year'
     ): {
         total: number;
         byStream: RevenueStream;

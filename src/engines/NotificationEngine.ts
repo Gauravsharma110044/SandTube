@@ -119,8 +119,18 @@ export class NotificationEngine {
         message: string,
         options: Partial<Notification> = {}
     ): Notification {
-        // Check if this type is enabled
-        if (!this.preferences[type]) {
+        // Map singular types to plural preference keys
+        const typeToPref: Record<string, keyof NotificationPreferences> = {
+            'upload': 'uploads',
+            'comment': 'comments',
+            'like': 'likes',
+            'subscribe': 'subscribes',
+            'mention': 'mentions',
+            'milestone': 'milestones'
+        };
+
+        const prefKey = typeToPref[type];
+        if (prefKey && !this.preferences[prefKey]) {
             return null as any;
         }
 
