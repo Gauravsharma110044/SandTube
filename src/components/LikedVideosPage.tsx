@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ThumbsUp, Play, Shuffle, Search, MoreVertical } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getMyLikedVideos } from '../services/youtube.ts';
+import BackendAPI from '../services/backend.ts';
 
 const LikedVideosPage: React.FC = () => {
     const navigate = useNavigate();
@@ -12,18 +13,30 @@ const LikedVideosPage: React.FC = () => {
 
     useEffect(() => {
         const fetchLikes = async () => {
+            let youtubeLikes: any[] = [];
+            let localLikes: any[] = [];
+
             if (user?.accessToken) {
                 try {
-                    const liked = await getMyLikedVideos(user.accessToken);
-                    setLikedVideos(liked || []);
+                    youtubeLikes = await getMyLikedVideos(user.accessToken) || [];
                 } catch (error) {
-                    console.error("Error fetching likes:", error);
+                    console.error("Error fetching YouTube likes:", error);
                 }
             }
+
+            if (user?.sub) {
+                try {
+                    localLikes = await BackendAPI.getLikedVideosByUser(user.sub);
+                } catch (error) {
+                    console.error("Error fetching local likes:", error);
+                }
+            }
+
+            setLikedVideos([...localLikes, ...youtubeLikes]);
             setLoading(false);
         };
         fetchLikes();
-    }, [user?.accessToken]);
+    }, [user?.accessToken, user?.sub]);
 
     const formatViews = (views: string) => {
         if (!views) return 'N/A';

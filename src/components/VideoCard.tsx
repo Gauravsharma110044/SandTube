@@ -1,6 +1,7 @@
-import React from 'react';
-import { MoreVertical, Maximize2 } from 'lucide-react';
+import { MoreVertical, Maximize2, ListPlus, Download, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import BackendAPI from '../services/backend.ts';
 
 interface VideoCardProps {
     id: string;
@@ -16,6 +17,17 @@ interface VideoCardProps {
 
 const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, channelId, views, timestamp, channelImage, horizontal = false }) => {
     const navigate = useNavigate();
+    const [isPremium, setIsPremium] = useState(false);
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    useEffect(() => {
+        if (user?.sub) {
+            const unsubscribe = BackendAPI.subscribeToPremiumStatus(user.sub, (active) => {
+                setIsPremium(active);
+            });
+            return () => unsubscribe();
+        }
+    }, [user?.sub]);
 
     const handleChannelClick = (e: React.MouseEvent) => {
         if (channelId) {
@@ -23,6 +35,27 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
             e.stopPropagation();
             navigate(`/channel/${channelId}`);
         }
+    };
+
+    const handleAddToQueue = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isPremium) {
+            if (window.confirm('Queue is a Premium feature. Want to upgrade?')) navigate('/premium');
+            return;
+        }
+        // Simulated queue
+        window.dispatchEvent(new CustomEvent('addToQueue', { detail: { id, title, thumbnail } }));
+    };
+
+    const handleDownload = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isPremium) {
+            if (window.confirm('Downloads are a Premium feature. Want to upgrade?')) navigate('/premium');
+            return;
+        }
+        BackendAPI.saveOfflineVideo(user.sub, { id, snippet: { thumbnails: { high: { url: thumbnail } }, title, channelTitle: channel, channelId, publishedAt: timestamp }, statistics: { viewCount: views } });
     };
 
     return (
@@ -64,31 +97,49 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
                     12:45
                 </div>
                 {!horizontal && (
-                    <div
-                        className="mini-player-btn"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            window.dispatchEvent(new CustomEvent('setMiniPlayer', { detail: id }));
-                        }}
-                        style={{
-                            position: 'absolute',
-                            top: '10px',
-                            right: '10px',
-                            background: 'rgba(0,0,0,0.6)',
-                            padding: '8px',
-                            borderRadius: '50%',
-                            opacity: 0,
-                            transition: 'opacity 0.2s',
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 5
-                        }}
-                        title="Play in Mini Player"
-                    >
-                        <Maximize2 size={18} />
+                    <div className="card-actions-overlay" style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        opacity: 0,
+                        transition: 'opacity 0.2s',
+                        zIndex: 10
+                    }}>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('setMiniPlayer', { detail: id }));
+                            }}
+                            className="overlay-btn"
+                            title="Play in Mini Player"
+                        >
+                            <Maximize2 size={16} />
+                        </button>
+                        <button
+                            onClick={handleAddToQueue}
+                            className="overlay-btn"
+                            style={{ color: isPremium ? '#FFD700' : 'white' }}
+                            title="Add to queue"
+                        >
+                            <ListPlus size={16} />
+                        </button>
+                        <button
+                            onClick={handleDownload}
+                            className="overlay-btn"
+                            style={{ color: isPremium ? '#FFD700' : 'white' }}
+                            title="Download"
+                        >
+                            <Download size={16} />
+                        </button>
+                    </div>
+                )}
+                {isPremium && !horizontal && (
+                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.6)', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Crown size={10} color="#FFD700" />
                     </div>
                 )}
             </div>
@@ -136,8 +187,26 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
             </div>
 
             <style>{`
-                .video-card:hover .mini-player-btn {
+                .video-card:hover .card-actions-overlay {
                     opacity: 1 !important;
+                }
+                .overlay-btn {
+                    background: rgba(0,0,0,0.8);
+                    border: none;
+                    color: white;
+                    padding: 8px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justifyContent: center;
+                    transition: all 0.2s;
+                    backdrop-filter: blur(5px);
+                }
+                .overlay-btn:hover {
+                    background: var(--primary) !important;
+                    color: white !important;
+                    transform: scale(1.1);
                 }
                 .video-card.horizontal:hover h3 {
                     color: var(--primary) !important;

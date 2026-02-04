@@ -1,14 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Maximize, Zap, Crown, Star, Mic, Volume2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import BackendAPI from '../services/backend.ts';
 
 interface VideoPlayerProps {
     videoId: string;
+    videoUrl?: string; // Optional direct URL for user-uploaded videos
     onEnded?: () => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, onEnded }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded }) => {
     const [ambientActive, setAmbientActive] = useState(true);
+    const [isPremium, setIsPremium] = useState(false);
+    const [highBitrate, setHighBitrate] = useState(false);
+    const [studioClear, setStudioClear] = useState(false);
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const navigate = useNavigate();
+    const playerRef = useRef<any>(null);
 
     useEffect(() => {
+        if (user?.sub) {
+            const unsubscribe = BackendAPI.subscribeToPremiumStatus(user.sub, (active) => {
+                setIsPremium(active);
+            });
+            return () => unsubscribe();
+        }
+    }, [user?.sub]);
+
+    const handleJumpToBestPart = () => {
+        if (playerRef.current) {
+            // Simulate jumping to a "high engagement" part (e.g., 35% into the video)
+            const duration = playerRef.current.getDuration();
+            playerRef.current.seekTo(duration * 0.35, true);
+        }
+    };
+
+    const handlePip = async () => {
+        const videoElement = document.querySelector('video');
+        if (videoElement && document.pictureInPictureEnabled) {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await videoElement.requestPictureInPicture();
+                }
+            } catch (error) {
+                console.error("PiP error:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (videoUrl) return; // Don't init YouTube if we have a direct URL
+
         // Load YouTube Iframe API
         if (!(window as any).YT) {
             const tag = document.createElement('script');
@@ -17,9 +61,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, onEnded }) => {
             firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
         }
 
-        let player: any;
-
         const onPlayerReady = (event: any) => {
+            playerRef.current = event.target;
             event.target.playVideo();
         };
 
@@ -30,7 +73,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, onEnded }) => {
         };
 
         const initPlayer = () => {
-            player = new (window as any).YT.Player(`youtube-player-${videoId}`, {
+            new (window as any).YT.Player(`youtube-player-${videoId}`, {
                 videoId: videoId,
                 playerVars: {
                     autoplay: 1,
@@ -52,11 +95,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, onEnded }) => {
         }
 
         return () => {
-            if (player) {
-                player.destroy();
+            if (playerRef.current) {
+                playerRef.current.destroy();
+                playerRef.current = null;
             }
         };
-    }, [videoId]);
+    }, [videoId, videoUrl, onEnded]);
 
     return (
         <div style={{ position: 'relative', width: '100%', borderRadius: '16px' }}>
@@ -68,7 +112,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, onEnded }) => {
                     left: '-5%',
                     width: '110%',
                     height: '110%',
-                    background: `url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg)`,
+                    background: `url(${videoUrl ? '' : `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`})`,
+                    backgroundColor: videoUrl ? '#111' : 'transparent',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     filter: 'blur(80px) saturate(2) brightness(0.6)',
@@ -92,20 +137,97 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, onEnded }) => {
                     zIndex: 1
                 }}
             >
-                <div id={`youtube-player-${videoId}`} style={{ width: '100%', height: '100%' }}></div>
+                {videoUrl ? (
+                    <video
+                        src={videoUrl}
+                        controls
+                        autoPlay
+                        onEnded={onEnded}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                ) : (
+                    <div id={`youtube-player-${videoId}`} style={{ width: '100%', height: '100%' }}></div>
+                )}
             </div>
 
-            {/* Controls Overlay (Theatre/Ambient toggles can be added here) */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '10px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <span
-                    onClick={() => setAmbientActive(!ambientActive)}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
-                >
-                    <div style={{ width: '30px', height: '14px', background: ambientActive ? 'var(--primary)' : '#444', borderRadius: '10px', position: 'relative', transition: '0.3s' }}>
-                        <div style={{ width: '10px', height: '10px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: ambientActive ? '18px' : '2px', transition: '0.3s' }} />
-                    </div>
-                    Ambient Mode
-                </span>
+            {/* Controls Overlay */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', padding: '0 5px' }}>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <span
+                        onClick={() => setAmbientActive(!ambientActive)}
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: ambientActive ? 'var(--primary)' : 'var(--text-muted)', transition: '0.3s' }}
+                    >
+                        <div style={{ width: '34px', height: '18px', background: ambientActive ? 'rgba(255, 61, 0, 0.2)' : 'rgba(255,255,255,0.05)', borderRadius: '10px', position: 'relative', border: `1px solid ${ambientActive ? 'var(--primary)' : 'var(--glass-border)'}` }}>
+                            <div style={{ width: '10px', height: '10px', background: ambientActive ? 'var(--primary)' : 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: ambientActive ? '19px' : '3px', transition: '0.3s' }} />
+                        </div>
+                        Ambient Mode
+                    </span>
+
+                    {isPremium && (
+                        <span
+                            onClick={() => setHighBitrate(!highBitrate)}
+                            style={{
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                                fontSize: '0.85rem', color: highBitrate ? '#FFD700' : 'var(--text-muted)', transition: '0.3s'
+                            }}
+                            title="1080p Premium (Enhanced Bitrate)"
+                        >
+                            <Zap size={16} fill={highBitrate ? '#FFD700' : 'none'} />
+                            Enhanced Quality
+                        </span>
+                    )}
+
+                    {isPremium && (
+                        <span
+                            onClick={handleJumpToBestPart}
+                            style={{
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                                fontSize: '0.85rem', color: '#FFD700', transition: '0.3s'
+                            }}
+                            title="Jump to most rewatched part"
+                        >
+                            <Star size={16} fill="#FFD700" />
+                            Best Part
+                        </span>
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    <button
+                        onClick={handlePip}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem' }}
+                        title="Picture in Picture"
+                    >
+                        <Maximize size={16} /> PiP
+                    </button>
+                    {isPremium && (
+                        <button
+                            onClick={() => setStudioClear(!studioClear)}
+                            style={{
+                                background: 'none', border: 'none',
+                                color: studioClear ? '#FFD700' : 'var(--text-muted)',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem',
+                                transition: '0.3s'
+                            }}
+                            title="Enhance vocals and remove background noise"
+                        >
+                            {studioClear ? <Mic size={16} fill="#FFD700" /> : <Volume2 size={16} />}
+                            Studio Clear
+                        </button>
+                    )}
+                    {isPremium ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#FFD700', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                            <Crown size={14} /> Premium active
+                        </div>
+                    ) : (
+                        <div
+                            onClick={() => navigate('/premium')}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer' }}
+                        >
+                            <Crown size={14} /> Get Premium
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

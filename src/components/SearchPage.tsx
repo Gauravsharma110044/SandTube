@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getEnrichedSearchResults } from '../services/youtube.ts';
 import { SlidersHorizontal, X } from 'lucide-react';
+import BackendAPI from '../services/backend.ts';
 
 const SearchPage: React.FC = () => {
     const [videos, setVideos] = useState<any[]>([]);
@@ -46,7 +47,22 @@ const SearchPage: React.FC = () => {
                 }
 
                 const results = await getEnrichedSearchResults(query, filters);
-                setVideos(results);
+
+                // Fetch local results
+                let localResults: any[] = [];
+                try {
+                    localResults = await BackendAPI.searchVideos(query);
+                    // Map local results to match YouTube structure if needed
+                    localResults = localResults.map(v => ({
+                        ...v,
+                        id: { videoId: v.id }, // Wrap ID to match YouTube structure
+                        isLocal: true
+                    }));
+                } catch (err) {
+                    console.error("Local search error:", err);
+                }
+
+                setVideos([...localResults, ...results]);
             } catch (error) {
                 console.error("Error fetching search results:", error);
             } finally {

@@ -26,6 +26,49 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Premium Themes */
+body.theme-aura {
+  --primary: #9d50bb;
+  --primary-hover: #b166ce;
+  --bg-dark: #0f0c29;
+  --surface: rgba(157, 80, 187, 0.1);
+  --glass: rgba(15, 12, 41, 0.7);
+  --glass-border: rgba(157, 80, 187, 0.2);
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background-attachment: fixed;
+}
+
+body.theme-cyberpunk {
+  --primary: #00ff41;
+  --primary-hover: #39ff14;
+  --bg-dark: #0d0208;
+  --surface: rgba(0, 255, 65, 0.05);
+  --glass: rgba(13, 2, 8, 0.85);
+  --glass-border: #008f11;
+  --text-main: #00ff41;
+  --text-muted: #003b00;
+}
+
+body.theme-midnight {
+  --primary: #ffd700;
+  --primary-hover: #ffec8b;
+  --bg-dark: #000000;
+  --surface: rgba(255, 215, 0, 0.05);
+  --glass: rgba(0, 0, 0, 0.9);
+  --glass-border: rgba(255, 215, 0, 0.2);
+}
+
+body.theme-sunset {
+  --primary: #ff5f6d;
+  --primary-hover: #ffc371;
+  --bg-dark: #2c0b0e;
+  --surface: rgba(255, 95, 109, 0.1);
+  --glass: rgba(44, 11, 14, 0.8);
+  --glass-border: rgba(255, 95, 109, 0.3);
+  background: linear-gradient(45deg, #2c0b0e, #5a0d16);
+  background-attachment: fixed;
+}
+
 body {
   margin: 0;
   padding: 0;

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon, Music, Trophy, Newspaper, Gamepad2 } from 'lucide-react';
+import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon, Music, Trophy, Newspaper, Gamepad2, Crown } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getMySubscriptions } from '../services/youtube.ts';
+import BackendAPI from '../services/backend.ts';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -40,7 +41,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
+    const [isPremium, setIsPremium] = useState(false);
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    useEffect(() => {
+        if (user?.sub) {
+            const unsubscribe = BackendAPI.subscribeToPremiumStatus(user.sub, (active) => {
+                setIsPremium(active);
+            });
+            return () => unsubscribe();
+        }
+    }, [user?.sub]);
 
     useEffect(() => {
         const fetchSubs = async () => {
@@ -89,8 +100,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>You</div>
             <SidebarItem icon={<LibraryIcon size={22} />} label="Library" active={isActive('/library')} onClick={() => navigate('/library')} />
             <SidebarItem icon={<History size={22} />} label="History" active={isActive('/history')} onClick={() => navigate('/history')} />
-            <SidebarItem icon={<PlaySquare size={22} />} label="Your videos" />
-            <SidebarItem icon={<Clock size={22} />} label="Watch later" />
+            <SidebarItem icon={<PlaySquare size={22} />} label="Your videos" active={isActive('/studio')} onClick={() => navigate('/studio')} />
+            <SidebarItem icon={<Clock size={22} />} label="Watch later" active={isActive('/watch-later')} onClick={() => navigate('/watch-later')} />
             <SidebarItem icon={<ThumbsUp size={22} />} label="Liked videos" active={isActive('/liked-videos')} onClick={() => navigate('/liked-videos')} />
 
             {user && subscriptions.length > 0 && (
@@ -123,6 +134,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
 
             <SidebarItem icon={<Settings size={22} />} label="Settings" active={isActive('/settings')} onClick={() => navigate('/settings')} />
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '15px 20px' }} />
+            <div style={{ padding: '0 30px 10px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>More from SandTube</div>
+            <SidebarItem
+                icon={<Crown size={22} color="#FFD700" />}
+                label={isPremium ? "Premium Benefits" : "Get Premium"}
+                active={isActive('/premium')}
+                onClick={() => navigate('/premium')}
+            />
+
             <SidebarItem icon={<Flag size={22} />} label="Report history" />
             <SidebarItem icon={<HelpCircle size={22} />} label="Help" />
             <SidebarItem icon={<MessageSquare size={22} />} label="Send feedback" />
