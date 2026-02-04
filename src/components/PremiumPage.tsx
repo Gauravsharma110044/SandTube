@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Crown, Zap, Shield, Download, Play, Star, Lock, X, Smartphone, ArrowRight, ExternalLink } from 'lucide-react';
+import { Check, Crown, Shield, X, Smartphone, ArrowRight, ExternalLink } from 'lucide-react';
 import BackendAPI from '../services/backend.ts';
 import { notificationEngine } from '../engines/index.ts';
 
 const PremiumPage: React.FC = () => {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
     const [isPremium, setIsPremium] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!!user?.sub);
     const [currentTheme, setCurrentTheme] = useState<string | null>(null);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<{ name: string, price: string, amount: number } | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [transactionId, setTransactionId] = useState('');
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     // Merchant UPI Config
     const MERCHANT_UPI_ID = "7834901357@fam";
@@ -31,8 +31,6 @@ const PremiumPage: React.FC = () => {
                 unsubPremium();
                 unsubTheme();
             };
-        } else {
-            setLoading(false);
         }
     }, [user?.sub]);
 
@@ -78,7 +76,7 @@ const PremiumPage: React.FC = () => {
                     setIsSuccess(false);
                     notificationEngine.createNotification('upload', 'Elite Upgrade', `Premium activated for ${user.name || 'User'}! 💎`);
                 }, 3000);
-            } catch (error) {
+            } catch (_) {
                 notificationEngine.createNotification('upload', 'Error', 'Verification failed. Please contact support.');
             }
             setIsProcessing(false);
@@ -88,14 +86,6 @@ const PremiumPage: React.FC = () => {
     const upiUri = selectedPlan ? `upi://pay?pa=${MERCHANT_UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${selectedPlan.amount}&cu=INR&tn=${encodeURIComponent(selectedPlan.name + " Plan")}` : "";
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
 
-    const features = [
-        { icon: <Zap size={24} />, title: 'Ad-free experience', desc: 'Watch videos without interruptions from ads.' },
-        { icon: <Download size={24} />, title: 'Background play', desc: 'Keep your music playing while using other apps.' },
-        { icon: <Play size={24} />, title: 'Offline downloads', desc: 'Save videos for when you’re low on data or offline.' },
-        { icon: <Shield size={24} />, title: 'SandTube Music Premium', desc: 'Ad-free music and background play.' },
-        { icon: <Crown size={24} />, title: 'Exclusive Badge', desc: 'A gold crown badge next to your name.' },
-        { icon: <Star size={24} />, title: '4K/HDR Access', desc: 'Highest quality streaming for premium members.' },
-    ];
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>Loading...</div>;
 
