@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { History as HistoryIcon, Trash2, Search, Settings, Pause, Play } from 'lucide-react';
-import VideoCard from './VideoCard.tsx';
+import { Link } from 'react-router-dom';
 
 const HistoryPage: React.FC = () => {
     const [localHistory, setLocalHistory] = useState<any[]>([]);
@@ -69,15 +69,9 @@ const HistoryPage: React.FC = () => {
                         {filteredHistory.map((video, i) => (
                             <div key={String(video.id?.videoId || video.id) + i} style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: mobile ? '8px' : '20px', alignItems: mobile ? 'stretch' : 'flex-start' }}>
                                 <div style={{ width: mobile ? '100%' : '280px', flexShrink: 0 }}>
-                                    <VideoCard
-                                        id={video.id.videoId || video.id}
-                                        thumbnail={video.snippet.thumbnails.high?.url}
-                                        title=""
-                                        channel=""
-                                        views=""
-                                        timestamp=""
-                                        channelImage=""
-                                    />
+                                    <Link to={`/watch/${video.id?.videoId || video.id}`} style={{ display: 'block' }}>
+                                        <img src={video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.default?.url} alt="" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '12px', display: 'block', background: 'var(--surface)' }} />
+                                    </Link>
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0, padding: '10px 0' }}>
                                     <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', lineHeight: '1.4' }}>{video.snippet.title}</h3>
@@ -96,7 +90,7 @@ const HistoryPage: React.FC = () => {
                         ))}
                     </div>
                 ) : (
-                    <div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>
+                    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
                         <HistoryIcon size={64} style={{ marginBottom: '20px', opacity: 0.5 }} />
                         <h2>No videos found.</h2>
                         <p>Your watch history will appear here.</p>
