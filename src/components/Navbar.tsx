@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Search, Video, Bell, LogOut, Clock, ArrowLeft, Crown } from 'lucide-react';
 import BackendAPI from '../services/backend.ts';
 import { useNavigate, Link } from 'react-router-dom';
-import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import { googleLogout } from '@react-oauth/google';
 import axios from 'axios';
 import { getSearchSuggestions } from '../services/youtube.ts';
 import NotificationPanel from './NotificationPanel.tsx';
@@ -67,30 +67,6 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    const login = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                });
-
-                const userData = {
-                    ...res.data,
-                    accessToken: tokenResponse.access_token,
-                    issuedAt: Date.now()
-                };
-
-                setUser(userData);
-                localStorage.setItem('user', JSON.stringify(userData));
-                window.location.reload();
-            } catch (err) {
-                console.error('Failed to fetch user profile', err);
-            }
-        },
-        scope: 'https://www.googleapis.com/auth/youtube.readonly',
-        onError: () => console.log('Login Failed'),
-    });
 
     const CLIENT_ID = (import.meta as any).env.VITE_GOOGLE_CLIENT_ID;
     const redirectLogin = () => {
