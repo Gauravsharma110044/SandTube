@@ -25,10 +25,14 @@ const SubscriptionsPage: React.FC = () => {
                     youtubeSubs = await getMySubscriptions(user.accessToken);
                     const popular = await getPopularVideos();
                     combinedVideos = [...popular];
+                    setSubscriptions(youtubeSubs);
+                    setVideos(combinedVideos);
+                    setLoading(false);
                 }
 
-                // Fetch Local Subscriptions
+                // Fetch Local Subscriptions (Firebase; may be unavailable, never blocks the page)
                 if (user?.sub) {
+                  try {
                     localSubs = await BackendAPI.getUserSubscriptions(user.sub);
 
                     // Convert local sub IDs to displayable objects
@@ -51,6 +55,10 @@ const SubscriptionsPage: React.FC = () => {
 
                     setSubscriptions([...localSubDetails, ...youtubeSubs]);
                     setVideos([...localVideos, ...combinedVideos]);
+                  } catch (e) {
+                    setSubscriptions(youtubeSubs);
+                    setVideos(combinedVideos);
+                  }
                 } else {
                     setSubscriptions(youtubeSubs);
                     setVideos(combinedVideos);
