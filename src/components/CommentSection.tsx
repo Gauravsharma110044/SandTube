@@ -180,7 +180,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                                     onClick={() => navigate(`/channel/${comment.authorChannelId?.value}`)}
                                     style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', objectFit: 'cover' }}
                                 />
-                                <div style={{ flex: 1 }}>
+                                <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                                         <span
                                             onClick={() => navigate(`/channel/${comment.authorChannelId?.value}`)}
@@ -228,7 +228,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                                                                 style={{ width: '24px', height: '24px', borderRadius: '50%' }}
                                                                 alt=""
                                                             />
-                                                            <div style={{ flex: 1 }}>
+                                                            <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                                                                     <span style={{ fontWeight: '600', fontSize: '0.8rem' }}>@{reply.snippet.authorDisplayName.replace(/\s+/g, '').toLowerCase()}</span>
                                                                     <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{getTimeAgo(reply.snippet.publishedAt)}</span>
