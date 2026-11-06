@@ -98,7 +98,11 @@ const CreatorStudio: React.FC = () => {
 
     const handleUpload = async () => {
         if (!uploadFile || !title) return;
-
+        // No video storage backend is connected to this app yet, so uploads cannot work. Say so instead of failing silently.
+        if (!(window as any).__SANDTUBE_UPLOAD_BACKEND__) {
+            alert('Video upload is not available yet: no storage backend is connected to SandTube. Nothing was uploaded.');
+            return;
+        }
         setUploadStatus('uploading');
 
         try {

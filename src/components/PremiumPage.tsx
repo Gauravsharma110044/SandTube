@@ -40,6 +40,7 @@ const PremiumPage: React.FC = () => {
         }
     };
 
+    const [paymentsNotice, setPaymentsNotice] = useState(false);
     const handleSubscribe = (planName: string) => {
         if (!user) {
             notificationEngine.createNotification('upload', 'Error', 'Please sign in to subscribe');
@@ -50,8 +51,9 @@ const PremiumPage: React.FC = () => {
             'Family': { price: '₹189', amount: 189 },
             'Student': { price: '₹79', amount: 79 }
         };
-        setSelectedPlan({ name: planName, ...plans[planName] });
-        setIsCheckoutOpen(true);
+        // Payments are not connected in this app: never open a fake checkout or activate Premium.
+        void plans; void planName; void setSelectedPlan; void setIsCheckoutOpen;
+        setPaymentsNotice(true);
     };
 
     const handleVerifyUPITransaction = async () => {
@@ -120,13 +122,16 @@ const PremiumPage: React.FC = () => {
             {/* Header */}
             <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                 <div style={{ display: 'inline-flex', padding: '12px 24px', borderRadius: '50px', background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)', marginBottom: '24px', alignItems: 'center', gap: '8px', color: '#ffd700', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                    <Crown size={16} /> NEW: UPI INSTANT ACTIVATION
+                    <Crown size={16} /> PREMIUM: NOT AVAILABLE YET
                 </div>
                 <h1 style={{ fontSize: '4rem', fontWeight: '900', marginBottom: '16px', letterSpacing: '-2px', background: 'linear-gradient(to bottom, #fff, #999)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     Premium Redefined.
                 </h1>
                 <p style={{ fontSize: '1.3rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
                     Experience SandTube like never before. Pure speed, no ads, just your content.
+                </p>
+                <p style={{ marginTop: '20px', color: '#ffd700', fontWeight: 600 }}>
+                    {paymentsNotice ? 'Payments are not connected in SandTube yet, so nothing can be bought or activated right now. You have not been charged.' : 'Premium is a preview. Payments are not connected yet, so plans cannot be bought.'}
                 </p>
             </div>
 
