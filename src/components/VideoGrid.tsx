@@ -18,14 +18,19 @@ const VideoGrid: React.FC = () => {
     useEffect(() => {
         const fetchVideos = async () => {
             setLoading(true);
+            // Show YouTube videos as soon as they arrive; add uploaded videos when ready.
+            const localPromise = BackendAPI.getAllVideos().catch(() => [] as any[]);
             try {
                 const youtubeVideos = await getPopularVideos();
-                const localVideos = await BackendAPI.getAllVideos();
-                setVideos([...localVideos, ...youtubeVideos]);
+                setVideos(youtubeVideos || []);
             } catch (error) {
                 console.error("Error fetching videos:", error);
             } finally {
                 setLoading(false);
+            }
+            const localVideos = await localPromise;
+            if (localVideos.length > 0) {
+                setVideos(prev => [...localVideos, ...prev]);
             }
         };
 

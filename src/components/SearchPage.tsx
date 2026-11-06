@@ -46,21 +46,12 @@ const SearchPage: React.FC = () => {
                     filters.videoDuration = duration;
                 }
 
-                const results = await getEnrichedSearchResults(query, filters);
+                const localPromise = BackendAPI.searchVideos(query)
+                    .then((r: any[]) => r.map(v => ({ ...v, id: { videoId: v.id }, isLocal: true })))
+                    .catch((err: any) => { console.error("Local search error:", err); return [] as any[]; });
 
-                // Fetch local results
-                let localResults: any[] = [];
-                try {
-                    localResults = await BackendAPI.searchVideos(query);
-                    // Map local results to match YouTube structure if needed
-                    localResults = localResults.map(v => ({
-                        ...v,
-                        id: { videoId: v.id }, // Wrap ID to match YouTube structure
-                        isLocal: true
-                    }));
-                } catch (err) {
-                    console.error("Local search error:", err);
-                }
+                const results = await getEnrichedSearchResults(query, filters);
+                const localResults = await localPromise;
 
                 setVideos([...localResults, ...results]);
             } catch (error) {

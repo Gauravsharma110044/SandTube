@@ -99,13 +99,18 @@ export const getEnrichedSearchResults = async (query: string, filters: any = {})
     const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
     const channelIds = Array.from(new Set(searchItems.map((item: any) => item.snippet.channelId))).join(',');
 
-    const [videosResponse, channelsResponse] = await Promise.all([
-        youtube.get('/videos', { params: { part: 'snippet,contentDetails,statistics', id: videoIds } }),
-        youtube.get('/channels', { params: { part: 'snippet,statistics', id: channelIds } })
-    ]);
-
-    const videoDetails = videosResponse.data.items;
-    const channelDetails = channelsResponse.data.items;
+    let videoDetails: any[] = [];
+    let channelDetails: any[] = [];
+    try {
+        const [videosResponse, channelsResponse] = await Promise.all([
+            youtube.get('/videos', { params: { part: 'snippet,contentDetails,statistics', id: videoIds } }),
+            youtube.get('/channels', { params: { part: 'snippet,statistics', id: channelIds } })
+        ]);
+        videoDetails = videosResponse.data.items;
+        channelDetails = channelsResponse.data.items;
+    } catch (error: any) {
+        console.error("YouTube API Error (Enrich):", error.response?.data?.error?.message || error.message);
+    }
 
     return searchItems.map((item: any) => {
         const fullVideo = videoDetails.find((v: any) => v.id === item.id.videoId);

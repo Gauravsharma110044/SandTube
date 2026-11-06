@@ -4,7 +4,14 @@
  */
 
 import { database } from '../config/firebase.ts';
-import { ref, set, get, push, onValue, update, remove, query, orderByChild, limitToLast } from 'firebase/database';
+import { ref, set, get as fbGet, push, onValue, update, remove, query, orderByChild, limitToLast } from 'firebase/database';
+
+// Firebase reads hang forever when the database is unreachable or misconfigured.
+// Fail fast so pages fall back to YouTube results instead of waiting.
+const get = ((r: any) => Promise.race([
+    fbGet(r),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 2000))
+])) as typeof fbGet;
 
 export class BackendAPI {
     /**
