@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { History, PlaySquare, Clock, ThumbsUp, ListVideo, User, Settings, Info, Crown, Download } from 'lucide-react';
 import BackendAPI from '../services/backend.ts';
 import VideoCard from './VideoCard.tsx';
+const CloudSyncCard = React.lazy(() => import('./CloudSyncCard.tsx'));
 import { getMyLikedVideos, getMyPlaylists, getMyChannel } from '../services/youtube.ts';
 import { useNavigate } from 'react-router-dom';
 
@@ -82,6 +83,7 @@ const Library: React.FC = () => {
     return (
         <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease', padding: mobile ? '12px' : '20px', minWidth: 0, overflowX: 'hidden' }}>
 
+            {user && <React.Suspense fallback={null}><CloudSyncCard /></React.Suspense>}
             {user && (
                 <div className="glass-morphism" style={{
                     padding: mobile ? '20px' : '40px',

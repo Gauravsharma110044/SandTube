@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Private per-user data. Only the owner can read or write.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['displayName', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 100;
+      allow delete: if false;
+
+      match /watchLater/{videoId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['video', 'addedAt'])
+          && request.resource.data.video is map
+          && request.resource.data.addedAt is string
+          && request.resource.data.addedAt.size() <= 40
+          && videoId.size() <= 40;
+        allow delete: if isOwner(uid);
+      }
+
+      match /history/{videoId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['video', 'watchedAt'])
+          && request.resource.data.video is map
+          && request.resource.data.watchedAt is string
+          && request.resource.data.watchedAt.size() <= 40
+          && videoId.size() <= 40;
+        allow delete: if isOwner(uid);
+      }
+
+      match /playlists/{playlistId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['title', 'createdAt', 'videos'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() >= 1
+          && request.resource.data.title.size() <= 100
+          && request.resource.data.createdAt is string
+          && request.resource.data.videos is list
+          && request.resource.data.videos.size() <= 200;
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Public comments. Anyone can read. Only a signed-in user can post as themselves. No edits. Authors can delete their own.
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['videoId', 'authorUid', 'authorName', 'text', 'createdAt'])
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.videoId is string
+        && request.resource.data.videoId.size() > 0
+        && request.resource.data.videoId.size() <= 20
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() <= 100
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
+    }
+
+    // Everything else, including any counters, is closed to clients.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

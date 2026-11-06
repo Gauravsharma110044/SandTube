@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown, User, ChevronDown, ChevronUp, MoreVertical, Crown } from 'lucide-react';
 import { getVideoComments } from '../services/youtube.ts';
 import BackendAPI from '../services/backend.ts';
+import type { CloudComment } from '../services/cloud.ts';
+const loadCloud = () => import('../services/cloud.ts');
 
 interface CommentSectionProps {
     videoId: string | undefined;
@@ -16,6 +18,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
     const [sortBy, setSortBy] = useState<'relevance' | 'time'>('relevance');
     const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
     const [isPremium, setIsPremium] = useState(false);
+    void isPremium;
+    const [cloudComments, setCloudComments] = useState<CloudComment[]>([]);
+    const [postError, setPostError] = useState('');
+    const [posting, setPosting] = useState(false);
+    const [cloudUid, setCloudUid] = useState<string | null>(null);
+
+    useEffect(() => {
+        let off = () => {};
+        loadCloud().then(async c => { const { auth } = await import('../config/firebaseCloud.ts'); off = auth.onAuthStateChanged(u => setCloudUid(u?.uid || null)); void c; });
+        return () => off();
+    }, []);
+    useEffect(() => {
+        if (!videoId) return;
+        let off = () => {}; let dead = false;
+        loadCloud().then(c => { if (!dead) off = c.subscribeComments(videoId, setCloudComments, () => setCloudComments([])); });
+        return () => { dead = true; off(); };
+    }, [videoId]);
 
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -62,29 +81,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
         setExpandedReplies(prev => ({ ...prev, [threadId]: !prev[threadId] }));
     };
 
-    const handlePostComment = () => {
-        if (!newComment.trim()) return;
-
-        const myComment = {
-            id: 'local-' + Date.now(),
-            snippet: {
-                topLevelComment: {
-                    snippet: {
-                        authorDisplayName: user?.name || 'Guest User',
-                        authorProfileImageUrl: user?.picture || '',
-                        authorChannelId: { value: '' },
-                        textDisplay: newComment,
-                        publishedAt: new Date().toISOString(),
-                        likeCount: 0,
-                        isPremiumUser: isPremium
-                    }
-                },
-                totalReplyCount: 0
-            }
-        };
-
-        setComments([myComment, ...comments]);
-        setNewComment('');
+    const handlePostComment = async () => {
+        if (!newComment.trim() || !videoId) return;
+        if (!user?.accessToken) { setPostError('Sign in with Google to comment.'); return; }
+        setPosting(true); setPostError('');
+        try {
+            await (await loadCloud()).postCloudComment(videoId, newComment);
+            setNewComment('');
+        } catch (e: any) {
+            setPostError('Could not post your comment: ' + (e?.code || e?.message || 'unknown error'));
+        } finally { setPosting(false); }
     };
 
     const formatLikes = (count: number) => {
@@ -115,7 +121,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
         <div style={{ marginTop: '30px', animation: 'fadeIn 0.5s ease' }}>
             {/* Header & Sorting */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '30px', marginBottom: '25px' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{comments.length} Comments</h3>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{comments.length} YouTube comments</h3>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <MoreVertical size={18} />
@@ -133,7 +139,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                 <div style={{ flex: 1 }}>
                     <input
                         type="text"
-                        placeholder="Add a comment..."
+                        placeholder="Add a SandTube comment (public, shown only on SandTube)..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         onBlur={() => !newComment && setNewComment('')}
@@ -147,12 +153,32 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                                 className="button-primary"
                                 style={{ padding: '10px 25px', borderRadius: '50px' }}
                             >
-                                Comment
+                                {posting ? 'Posting...' : 'Comment'}
                             </button>
                         </div>
                     )}
                 </div>
             </div>
+
+            {postError && <p style={{ color: '#ff8a80', fontSize: '0.85rem', margin: '-25px 0 20px 55px' }}>{postError}</p>}
+
+            {cloudComments.length > 0 && (
+                <div style={{ marginBottom: '30px' }}>
+                    <h4 style={{ fontSize: '1rem', marginBottom: '14px' }}>{cloudComments.length} SandTube comments</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                        {cloudComments.map(c => (
+                            <div key={c.id} style={{ display: 'flex', gap: '12px' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={16} color="var(--text-muted)" /></div>
+                                <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{c.authorName} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>{c.createdAt ? getTimeAgo(c.createdAt.toISOString()) : 'Just now'}</span></div>
+                                    <p style={{ margin: '4px 0', fontSize: '0.92rem' }}>{c.text}</p>
+                                    {cloudUid && cloudUid === c.authorUid && <button onClick={async () => (await loadCloud()).deleteCloudComment(c.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Delete</button>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Comments List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -188,7 +214,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ videoId }) => {
                                         >
                                             @{comment.authorDisplayName.replace(/\s+/g, '').toLowerCase()}
                                         </span>
-                                        {(comment.isPremiumUser || Math.random() > 0.8) && (
+                                        {comment.isPremiumUser && (
                                             <div title="Premium Subscriber">
                                                 <Crown size={12} color="#FFD700" fill="#FFD700" />
                                             </div>

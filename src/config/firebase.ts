@@ -1,40 +1,21 @@
-/**
- * Firebase Configuration for SandTube
- * Real-time database, authentication, and cloud functions
- */
-
+// Firebase (Spark plan, no billing): Auth (Google) + Firestore only.
+// These web config values are public identifiers by design. Access is controlled by firestore.rules.
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
-import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
-import { getAnalytics } from 'firebase/analytics';
 
-// Firebase configuration
-// TODO: Replace with your actual Firebase config from Firebase Console
+const env = (import.meta as any).env;
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY",
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "sandtube.firebaseapp.com",
-    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://sandtube-default-rtdb.firebaseio.com",
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "sandtube",
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "sandtube.appspot.com",
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef",
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-XXXXXXXXXX"
+    apiKey: env.VITE_FIREBASE_API_KEY,
+    authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || 'sandtube.firebaseapp.com',
+    projectId: env.VITE_FIREBASE_PROJECT_ID || 'sandtube',
+    storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize services
+export const app = initializeApp(firebaseConfig);
+// Legacy: services/backend.ts still targets Realtime Database, which is not provisioned. Not used by the new cloud layer.
 export const database = getDatabase(app);
-export const auth = getAuth(app);
+// Legacy: Cloud Storage needs the paid Blaze plan, so uploads (Creator Studio) cannot work on the free plan.
 export const storage = getStorage(app);
-
-// Initialize analytics (only in browser)
-let analytics = null;
-if (typeof window !== 'undefined') {
-    analytics = getAnalytics(app);
-}
-
-export { analytics };
-export default app;
