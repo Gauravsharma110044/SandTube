@@ -17,6 +17,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const navigate = useNavigate();
     const playerRef = useRef<any>(null);
+    const [playerError, setPlayerError] = useState(false);
 
     useEffect(() => {
         if (user?.sub) {
@@ -63,6 +64,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
 
         const onPlayerReady = (event: any) => {
             playerRef.current = event.target;
+            setPlayerError(false);
             event.target.playVideo();
         };
 
@@ -72,6 +74,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
             }
         };
 
+        setPlayerError(false);
+        const loadTimer = window.setTimeout(() => { if (!playerRef.current) setPlayerError(true); }, 12000);
         const initPlayer = () => {
             new (window as any).YT.Player(`youtube-player-${videoId}`, {
                 videoId: videoId,
@@ -84,6 +88,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
                 events: {
                     onReady: onPlayerReady,
                     onStateChange: onPlayerStateChange,
+                    onError: () => setPlayerError(true),
                 },
             });
         };
@@ -95,6 +100,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
         }
 
         return () => {
+            window.clearTimeout(loadTimer);
             if (playerRef.current) {
                 playerRef.current.destroy();
                 playerRef.current = null;
@@ -146,7 +152,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                 ) : (
+                    <>
                     <div id={`youtube-player-${videoId}`} style={{ width: '100%', height: '100%' }}></div>
+                    {playerError && !videoUrl && (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, background: 'rgba(0,0,0,0.88)', color: 'white', textAlign: 'center', padding: 16, zIndex: 5 }}>
+                            <div>This video can't be played here.</div>
+                            <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#000', background: '#fff', padding: '8px 16px', borderRadius: 20, fontWeight: 700, textDecoration: 'none' }}>Open on YouTube</a>
+                        </div>
+                    )}
+                    </>
                 )}
             </div>
 

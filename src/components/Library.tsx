@@ -209,7 +209,7 @@ const Library: React.FC = () => {
                     <section style={{ marginBottom: '60px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                             <h2 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <ListVideo size={28} style={{ color: 'var(--primary)' }} /> Playlists
+                                <ListVideo size={28} style={{ color: 'var(--primary)' }} /> YouTube playlists
                             </h2>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
@@ -233,7 +233,7 @@ const Library: React.FC = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <p style={{ color: 'var(--text-muted)' }}>No playlists found.</p>
+                                    <p style={{ color: 'var(--text-muted)' }}>{plOk ? 'No YouTube playlists found on your account.' : 'YouTube playlists unavailable (could not load). Device-only playlists are under Playlists in the menu.'}</p>
                                 )
                             ) : (
                                 <p style={{ color: 'var(--text-muted)' }}>Sign in to see playlists.</p>

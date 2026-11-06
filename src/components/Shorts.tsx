@@ -76,6 +76,7 @@ const Shorts: React.FC = () => {
                                 ) : (
                                     <img src={short.snippet.thumbnails?.high?.url || short.snippet.thumbnails?.medium?.url} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
                                 )}
+                                <a href={`https://www.youtube.com/shorts/${id}`} target="_blank" rel="noopener noreferrer" style={{ position: 'absolute', top: 10, right: 10, zIndex: 30, color: 'white', background: 'rgba(0,0,0,0.55)', padding: '4px 10px', borderRadius: 14, fontSize: '0.72rem', textDecoration: 'none' }}>Open on YouTube</a>
                                 <div style={{ position: 'absolute', left: 0, right: 56, bottom: 0, padding: '40px 14px 14px', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', pointerEvents: 'none', zIndex: 10 }}>
                                     <div
                                         onClick={() => navigate(`/channel/${short.snippet.channelId}`)}
