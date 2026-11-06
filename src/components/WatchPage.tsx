@@ -308,15 +308,6 @@ const WatchPage: React.FC = () => {
         return String(num);
     };
 
-    if (loading || !video) {
-        return (
-            <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
-                <div style={{ width: '90%', maxWidth: '1200px', aspectRatio: '16/9', background: 'var(--surface)', borderRadius: '16px', animation: 'pulse 1.5s infinite' }} />
-                <div style={{ color: 'var(--text-muted)' }}>Preparing your viewing...</div>
-            </div>
-        );
-    }
-
     const handleVideoEnd = () => {
         if (autoplayEnabled && relatedVideos.length > 0) {
             setNextVideoCountdown(5);
@@ -335,6 +326,15 @@ const WatchPage: React.FC = () => {
         const timer = setTimeout(() => setNextVideoCountdown(nextVideoCountdown - 1), 1000);
         return () => clearTimeout(timer);
     }, [nextVideoCountdown, relatedVideos, navigate]);
+
+    if (loading || !video) {
+        return (
+            <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
+                <div style={{ width: '90%', maxWidth: '1200px', aspectRatio: '16/9', background: 'var(--surface)', borderRadius: '16px', animation: 'pulse 1.5s infinite' }} />
+                <div style={{ color: 'var(--text-muted)' }}>Preparing your viewing...</div>
+            </div>
+        );
+    }
 
     const effectiveTheatreMode = isSmallScreen;
 
