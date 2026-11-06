@@ -14,6 +14,7 @@ const HISTORY_KEY = 'sandtube_history';
 const WATCH_LATER_KEY = 'sandtube_watch_later';
 const PLAYLISTS_KEY = 'sandtube_playlists_v2';
 
+const clean = (x: any) => JSON.parse(JSON.stringify(x)); // Firestore rejects undefined fields
 const readJson = (k: string): any[] => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; } };
 
 export const cloudUser = () => auth.currentUser;
@@ -44,10 +45,10 @@ export const backUpToCloud = async (): Promise<SyncReport> => {
     const hist = readJson(HISTORY_KEY).slice(0, 200);
     const pls = getPlaylists().slice(0, 50);
     const batch = writeBatch(db);
-    wl.forEach(v => { const id = videoIdOf(v); if (id) batch.set(doc(db, 'users', uid, 'watchLater', id), { video: slimVideo(v), addedAt: now }); });
-    hist.forEach(v => { const id = videoIdOf(v); if (id) batch.set(doc(db, 'users', uid, 'history', id), { video: slimVideo(v), watchedAt: now }); });
+    wl.forEach(v => { const id = videoIdOf(v); if (id) batch.set(doc(db, 'users', uid, 'watchLater', id), { video: clean(slimVideo(v)), addedAt: now }); });
+    hist.forEach(v => { const id = videoIdOf(v); if (id) batch.set(doc(db, 'users', uid, 'history', id), { video: clean(slimVideo(v)), watchedAt: now }); });
     pls.forEach(p => batch.set(doc(db, 'users', uid, 'playlists', p.id), {
-        title: (p.title || 'Untitled').slice(0, 100), createdAt: p.createdAt || now, videos: (p.videos || []).slice(0, 200).map(slimVideo),
+        title: (p.title || 'Untitled').slice(0, 100), createdAt: p.createdAt || now, videos: (p.videos || []).slice(0, 200).map(v => clean(slimVideo(v))),
     }));
     await batch.commit();
     return { uploaded: { watchLater: wl.length, history: hist.length, playlists: pls.length } };
