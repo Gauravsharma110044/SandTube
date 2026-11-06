@@ -103,7 +103,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoId, videoUrl, onEnded })
     }, [videoId, videoUrl, onEnded]);
 
     return (
-        <div style={{ position: 'relative', width: '100%', borderRadius: '16px' }}>
+        <div style={{ position: 'relative', width: '100%', borderRadius: '16px', overflowX: 'clip' }}>
             {/* Ambient Background Glow */}
             {ambientActive && (
                 <div style={{
