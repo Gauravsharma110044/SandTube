@@ -165,7 +165,7 @@ const VideoGrid: React.FC = () => {
                 }
                 @media (max-width: 768px) {
                   .responsive-grid {
-                    grid-template-columns: 1fr;
+                    grid-template-columns: minmax(0, 1fr);
                     gap: 30px;
                   }
                 }

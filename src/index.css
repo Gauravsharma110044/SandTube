@@ -163,7 +163,7 @@ body {
 
 @media (max-width: 640px) {
   .responsive-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 15px;
   }
 }
@@ -190,3 +190,4 @@ body {
     transform: translateX(0);
   }
 }
+.responsive-grid > *, .video-card { min-width: 0; max-width: 100%; }
