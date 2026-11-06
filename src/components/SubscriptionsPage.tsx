@@ -83,7 +83,7 @@ const SubscriptionsPage: React.FC = () => {
         <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease', padding: '20px' }}>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Latest</h1>
+                <div><h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Popular on YouTube</h1><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Not from your subscriptions. A feed of your channels' uploads is not available here yet.</div></div>
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                     <button style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 'bold', cursor: 'pointer' }}>Manage</button>
                     <div style={{ display: 'flex', background: 'var(--surface)', borderRadius: '10px', padding: '4px' }}>

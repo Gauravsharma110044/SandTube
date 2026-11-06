@@ -14,6 +14,8 @@ const Library: React.FC = () => {
     const [isPremium, setIsPremium] = useState(false);
     const [myChannel, setMyChannel] = useState<any>(null);
     const [ytDone, setYtDone] = useState(false);
+    const [likedOk, setLikedOk] = useState(false);
+    const [plOk, setPlOk] = useState(false);
     const [mobile, setMobile] = useState(window.innerWidth < 900);
     useEffect(() => {
         const f = () => setMobile(window.innerWidth < 900);
@@ -35,8 +37,8 @@ const Library: React.FC = () => {
                         getMyPlaylists(user.accessToken),
                         getMyChannel(user.accessToken)
                     ]);
-                    if (liked.status === 'fulfilled') setLikedVideos(liked.value);
-                    if (myPlaylists.status === 'fulfilled') setPlaylists(myPlaylists.value);
+                    if (liked.status === 'fulfilled') { setLikedVideos(liked.value); setLikedOk(true); }
+                    if (myPlaylists.status === 'fulfilled') { setPlaylists(myPlaylists.value); setPlOk(true); }
                     if (channel.status === 'fulfilled') setMyChannel(channel.value);
                 } catch (error) {
                     console.error("Error fetching library data:", error);
@@ -102,12 +104,12 @@ const Library: React.FC = () => {
                         <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{user.email} • {myChannel?.snippet?.customUrl || (ytDone ? 'YouTube handle unavailable' : 'Loading...')}</p>
                         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
                             <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{likedVideos.length}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Likes</div>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{likedOk ? likedVideos.length : '-'}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{likedOk ? 'YouTube likes' : 'Likes unavailable'}</div>
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{playlists.length}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Playlists</div>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{plOk ? playlists.length : '-'}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{plOk ? 'YouTube playlists' : 'Playlists unavailable'}</div>
                             </div>
                             <div style={{ textAlign: 'center' }}>
                                 <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{localHistory.length}</div>
