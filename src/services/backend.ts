@@ -23,13 +23,23 @@ export class BackendAPI {
     }
 
     static async getAllVideos() {
-        const videosRef = ref(database, 'videos');
-        const snapshot = await get(videosRef);
-        const videos: any[] = [];
-        snapshot.forEach((child) => {
-            videos.push({ id: child.key, ...child.val() });
-        });
-        return videos;
+        // Firebase get() can hang forever if the database is unreachable or misconfigured,
+        // which kept the home page stuck on loading cards. Give up after 4s and return [].
+        try {
+            const videosRef = ref(database, 'videos');
+            const snapshot = await Promise.race([
+                get(videosRef),
+                new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 4000))
+            ]);
+            const videos: any[] = [];
+            snapshot.forEach((child) => {
+                videos.push({ id: child.key, ...child.val() });
+            });
+            return videos;
+        } catch (error) {
+            console.error('Could not load uploaded videos:', error);
+            return [];
+        }
     }
 
     static async getVideosByChannel(channelId: string) {
