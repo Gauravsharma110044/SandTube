@@ -269,7 +269,7 @@ const CreatorStudio: React.FC = () => {
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: isMobile ? '20px' : '40px', overflowY: 'auto' }}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                <header style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                     <div>
                         <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>
                             {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
@@ -315,7 +315,7 @@ const CreatorStudio: React.FC = () => {
                         <div className="glass-card" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Uploaded Videos</h3>
                             <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>{userVideos.length}</div>
-                            <div style={{ color: '#00e676', fontSize: '0.9rem', marginTop: '8px' }}>Uploads are not available yet</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '8px' }}>Uploads are not available yet</div>
                         </div>
                     </div>
                 )}

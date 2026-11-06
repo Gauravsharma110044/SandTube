@@ -164,7 +164,7 @@ const Library: React.FC = () => {
                         </div>
                     </section>
 
-                    <section style={{ marginBottom: '60px' }}>
+                    <section hidden aria-hidden="true" style={{ marginBottom: '60px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                             <h2 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
                                 <Download size={28} style={{ color: isPremium ? '#FFD700' : 'var(--primary)' }} /> Offline Downloads
