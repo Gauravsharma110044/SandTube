@@ -83,7 +83,6 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
                 <img
                     src={thumbnail}
                     alt={title}
-                    loading="lazy"
                     onError={(e) => {
                         const img = e.currentTarget;
                         const fallback = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
