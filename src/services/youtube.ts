@@ -10,6 +10,23 @@ const youtube = axios.create({
     }
 });
 
+// YouTube API returns HTML entities (&amp; &#39; ...) in text fields; decode them.
+const decodeEntities = (text: any) => {
+    if (typeof text !== 'string' || !text.includes('&')) return text;
+    const el = document.createElement('textarea');
+    el.innerHTML = text;
+    return el.value;
+};
+const cleanItem = (item: any) => {
+    if (item?.snippet) {
+        item.snippet.title = decodeEntities(item.snippet.title);
+        item.snippet.description = decodeEntities(item.snippet.description);
+        item.snippet.channelTitle = decodeEntities(item.snippet.channelTitle);
+    }
+    return item;
+};
+const cleanItems = (items: any[]) => (items || []).map(cleanItem);
+
 // Mock Data for Fallback
 const MOCK_VIDEOS = [
     {
@@ -63,7 +80,7 @@ export const getPopularVideos = async () => {
                 regionCode: 'US'
             }
         });
-        return response.data.items;
+        return cleanItems(response.data.items);
     } catch (error: any) {
         console.error("YouTube API Error (Popular):", error.response?.data?.error?.message || error.message);
         return MOCK_VIDEOS; // Fallback to mock data
@@ -81,7 +98,7 @@ export const searchVideos = async (query: string, filters: any = {}) => {
                 ...filters
             }
         });
-        return response.data.items;
+        return cleanItems(response.data.items);
     } catch (error: any) {
         console.error("YouTube API Error (Search):", error.response?.data?.error?.message || error.message);
         // Filter mock results for basic search fallback
@@ -143,7 +160,7 @@ export const getVideoDetails = async (videoId: string) => {
                 id: videoId
             }
         });
-        return response.data.items[0];
+        return cleanItem(response.data.items[0]);
     } catch (error: any) {
         console.error("YouTube API Error (VideoDetails):", error.response?.data?.error?.message || error.message);
         // Fallback for mock videos if they are opened directly
@@ -153,20 +170,30 @@ export const getVideoDetails = async (videoId: string) => {
 };
 
 export const getRelatedVideos = async (videoId: string) => {
+    // YouTube removed the relatedToVideoId search option, so build "related" from
+    // a search on this video's title, falling back to popular videos.
     try {
-        const response = await youtube.get('/search', {
-            params: {
-                part: 'snippet',
-                relatedToVideoId: videoId,
-                type: 'video',
-                maxResults: 10
-            }
-        });
-        return response.data.items || [];
+        const detail = await youtube.get('/videos', { params: { part: 'snippet', id: videoId } });
+        const title = decodeEntities(detail.data.items?.[0]?.snippet?.title || '');
+        const q = title.split(/\s+/).slice(0, 6).join(' ');
+        if (q) {
+            const response = await youtube.get('/search', {
+                params: { part: 'snippet', q, type: 'video', maxResults: 12 }
+            });
+            const items = cleanItems(response.data.items || []).filter((i: any) => i.id?.videoId && i.id.videoId !== videoId);
+            if (items.length > 0) return items;
+        }
+        throw new Error('No related results');
     } catch (error: any) {
         console.error("YouTube API Error (Related):", error.response?.data?.error?.message || error.message);
-        // Fallback: return popular videos as "related"
-        return MOCK_VIDEOS.map(v => ({ ...v, id: { videoId: v.id } }));
+        try {
+            const popular = await getPopularVideos();
+            return popular
+                .filter((v: any) => v.id !== videoId && !String(v.id).endsWith('_mock'))
+                .map((v: any) => ({ ...v, id: { videoId: v.id } }));
+        } catch {
+            return [];
+        }
     }
 };
 
