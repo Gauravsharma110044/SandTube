@@ -322,10 +322,12 @@ const WatchPage: React.FC = () => {
             animation: 'fadeIn 0.5s ease',
             padding: effectiveTheatreMode ? '0' : '0 20px',
             maxWidth: '1700px',
+            width: '100%',
+            minWidth: 0,
             margin: '0 auto'
         }}>
             {/* Primary Content */}
-            <div style={{ flex: effectiveTheatreMode ? 'none' : '1', width: effectiveTheatreMode ? '100%' : 'unset' }}>
+            <div style={{ flex: effectiveTheatreMode ? 'none' : '1', width: effectiveTheatreMode ? '100%' : 'unset', minWidth: 0, maxWidth: '100%' }}>
                 <VideoPlayer videoId={id || ''} videoUrl={video.videoUrl} onEnded={handleVideoEnd} />
 
                 {nextVideoCountdown !== null && relatedVideos.length > 0 && (
@@ -362,7 +364,7 @@ const WatchPage: React.FC = () => {
                             <button className="button-primary" style={{ padding: '8px 18px', marginLeft: '5px', fontSize: '0.85rem' }}>Subscribe</button>
                         </div>
 
-                        <div className="watch-actions" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', maxWidth: '100%' }}>
+                        <div className="watch-actions" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', maxWidth: '100%', minWidth: 0 }}>
                             <div style={{ display: 'flex', background: 'var(--surface)', borderRadius: '50px', overflow: 'hidden', alignItems: 'center' }}>
                                 <button
                                     onClick={handleLike}
