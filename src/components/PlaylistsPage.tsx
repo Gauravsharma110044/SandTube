@@ -18,7 +18,7 @@ const PlaylistsPage: React.FC = () => {
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
             <h1 style={{ fontSize: '1.8rem', marginBottom: '6px' }}>Playlists</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>Saved on this device only. No sign-in, no sync.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>Saved on this device only. Optional cloud backup is in Library.</p>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }} placeholder="New playlist name"
                     style={{ flex: 1, background: 'var(--surface)', border: 'none', color: 'white', padding: '12px', borderRadius: '10px', outline: 'none' }} />

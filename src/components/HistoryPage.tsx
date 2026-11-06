@@ -62,7 +62,7 @@ const HistoryPage: React.FC = () => {
                 <h1 style={{ fontSize: '2rem', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '15px' }}>
                     Watch History
                 </h1>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '-20px 0 24px' }}>Saved on this device only. No sign-in, no sync.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '-20px 0 24px' }}>Saved on this device only. Optional cloud backup is in Library.</p>
 
                 {filteredHistory.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

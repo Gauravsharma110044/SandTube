@@ -274,11 +274,11 @@ const CreatorStudio: React.FC = () => {
                         <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>
                             {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                         </h1>
-                        <p style={{ color: 'var(--text-muted)' }}>Welcome back, Creator!</p>
+                        <p style={{ color: 'var(--text-muted)' }}>Creator tools are a preview: uploads and live are not available yet.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
                         <button
-                            onClick={() => setIsLiveModalOpen(true)}
+                            onClick={() => alert('Going live is not available yet: no streaming backend is connected to SandTube.')}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 padding: '12px 24px', borderRadius: '12px', border: '1px solid var(--primary)',
@@ -302,20 +302,20 @@ const CreatorStudio: React.FC = () => {
                         {/* Stats Cards */}
                         <div className="glass-card" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Total Subscribers</h3>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>{userVideos.length > 0 ? (userVideos.length * 12).toLocaleString() : '12,458'}</div>
-                            <div style={{ color: '#00e676', fontSize: '0.9rem', marginTop: '8px' }}>↑ 12% this month</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>—</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '8px' }}>Not tracked yet</div>
                         </div>
                         <div className="glass-card" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Total Views</h3>
                             <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>
                                 {userVideos.reduce((acc, v) => acc + parseInt(v.statistics?.viewCount || '0'), 0).toLocaleString()}
                             </div>
-                            <div style={{ color: '#00e676', fontSize: '0.9rem', marginTop: '8px' }}>↑ 8.2% this month</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '8px' }}>Not tracked yet</div>
                         </div>
                         <div className="glass-card" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Uploaded Videos</h3>
                             <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>{userVideos.length}</div>
-                            <div style={{ color: '#00e676', fontSize: '0.9rem', marginTop: '8px' }}>All live & healthy</div>
+                            <div style={{ color: '#00e676', fontSize: '0.9rem', marginTop: '8px' }}>Uploads are not available yet</div>
                         </div>
                     </div>
                 )}

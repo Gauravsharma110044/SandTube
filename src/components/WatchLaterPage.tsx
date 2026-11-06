@@ -14,7 +14,7 @@ const WatchLaterPage: React.FC = () => {
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
             <h1 style={{ fontSize: '1.8rem', marginBottom: '6px' }}>Watch later</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '24px' }}>Saved on this device only. No sign-in, no sync.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '24px' }}>Saved on this device only. Optional cloud backup is in Library.</p>
             {items.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
                     <Clock size={64} style={{ opacity: 0.3, marginBottom: '16px' }} />
