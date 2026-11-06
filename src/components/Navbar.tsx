@@ -92,6 +92,37 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         onError: () => console.log('Login Failed'),
     });
 
+    const CLIENT_ID = (import.meta as any).env.VITE_GOOGLE_CLIENT_ID;
+    const redirectLogin = () => {
+        const state = Math.random().toString(36).slice(2);
+        sessionStorage.setItem('st_oauth_state', state);
+        sessionStorage.setItem('st_oauth_return', window.location.pathname + window.location.search);
+        const q = new URLSearchParams({
+            client_id: CLIENT_ID,
+            redirect_uri: window.location.origin,
+            response_type: 'token',
+            scope: 'https://www.googleapis.com/auth/youtube.readonly',
+            include_granted_scopes: 'true',
+            state,
+        });
+        window.location.assign('https://accounts.google.com/o/oauth2/v2/auth?' + q.toString());
+    };
+
+    useEffect(() => {
+        const h = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const tok = h.get('access_token');
+        if (!tok) return;
+        const ok = h.get('state') && h.get('state') === sessionStorage.getItem('st_oauth_state');
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        if (!ok) return;
+        axios.get('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tok}` } })
+            .then(res => {
+                localStorage.setItem('user', JSON.stringify({ ...res.data, accessToken: tok, issuedAt: Date.now() }));
+                window.location.replace(sessionStorage.getItem('st_oauth_return') || '/');
+            })
+            .catch(() => alert('Sign-in failed while loading your Google profile. Please try again.'));
+    }, []);
+
     const handleSearch = (e?: React.FormEvent, queryOverride?: string) => {
         if (e) e.preventDefault();
         const finalQuery = queryOverride || searchQuery;
@@ -326,7 +357,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                         </>
                     ) : (
                         <button
-                            onClick={() => login()}
+                            onClick={redirectLogin}
                             className="button-primary"
                             style={{ padding: '6px 15px', fontSize: '0.9rem' }}
                         >
