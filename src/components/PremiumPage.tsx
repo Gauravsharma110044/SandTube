@@ -18,21 +18,8 @@ const PremiumPage: React.FC = () => {
     const MERCHANT_UPI_ID = "REDACTED@fam";
     const MERCHANT_NAME = "SandTube Premium";
 
-    useEffect(() => {
-        if (user?.sub) {
-            const unsubPremium = BackendAPI.subscribeToPremiumStatus(user.sub, (active) => {
-                setIsPremium(active);
-                setLoading(false);
-            });
-            const unsubTheme = BackendAPI.subscribeToUserPreference(user.sub, 'theme', (theme) => {
-                setCurrentTheme(theme);
-            });
-            return () => {
-                unsubPremium();
-                unsubTheme();
-            };
-        }
-    }, [user?.sub]);
+    // Premium status and theme live in Realtime Database, which is not set up for this app. Do not wait on it.
+    useEffect(() => { setLoading(false); void setCurrentTheme; }, []);
 
     const handleThemeChange = async (theme: string | null) => {
         if (user?.sub) {
