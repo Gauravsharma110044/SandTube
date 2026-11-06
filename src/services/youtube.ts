@@ -345,40 +345,52 @@ export const getVideoComments = async (videoId: string) => {
     }
 };
 
+const isoToSeconds = (iso?: string) => {
+    const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || '');
+    if (!m) return 9999;
+    return (parseInt(m[1] || '0') * 3600) + (parseInt(m[2] || '0') * 60) + parseInt(m[3] || '0');
+};
+
 export const getShorts = async () => {
     try {
         const response = await youtube.get('/search', {
             params: {
                 part: 'snippet',
-                q: '#shorts sand art',
+                q: '#shorts sand art satisfying',
                 type: 'video',
                 videoDuration: 'short',
-                maxResults: 10
+                maxResults: 30
             }
         });
 
-        const searchItems = response.data.items;
-        if (!searchItems || searchItems.length === 0) return [];
-
-        const videoIds = searchItems.map((item: any) => item.id.videoId).join(',');
+        const seen = new Set<string>();
+        const searchItems = (response.data.items || []).filter((item: any) => {
+            const id = item.id?.videoId;
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+        });
+        if (searchItems.length === 0) return [];
 
         const statsResponse = await youtube.get('/videos', {
             params: {
                 part: 'statistics,contentDetails',
-                id: videoIds
+                id: searchItems.map((item: any) => item.id.videoId).join(',')
             }
         });
+        const videoDetails = statsResponse.data.items || [];
 
-        const videoDetails = statsResponse.data.items;
-
-        return searchItems.map((item: any) => {
-            const details = videoDetails.find((v: any) => v.id === item.id.videoId);
-            return {
-                ...item,
-                statistics: details?.statistics,
-                contentDetails: details?.contentDetails
-            };
-        });
+        return searchItems
+            .map((item: any) => {
+                const details = videoDetails.find((v: any) => v.id === item.id.videoId);
+                return {
+                    ...item,
+                    snippet: { ...item.snippet, title: decodeEntities(item.snippet.title) },
+                    statistics: details?.statistics,
+                    contentDetails: details?.contentDetails
+                };
+            })
+            .filter((v: any) => v.contentDetails && isoToSeconds(v.contentDetails.duration) <= 60);
     } catch (error: any) {
         console.error("YouTube API Error (Shorts):", error.response?.data?.error?.message || error.message);
         return [];
