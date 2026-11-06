@@ -13,6 +13,13 @@ const Library: React.FC = () => {
     const [offlineVideos, setOfflineVideos] = useState<any[]>([]);
     const [isPremium, setIsPremium] = useState(false);
     const [myChannel, setMyChannel] = useState<any>(null);
+    const [ytDone, setYtDone] = useState(false);
+    const [mobile, setMobile] = useState(window.innerWidth < 900);
+    useEffect(() => {
+        const f = () => setMobile(window.innerWidth < 900);
+        window.addEventListener('resize', f);
+        return () => window.removeEventListener('resize', f);
+    }, []);
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     useEffect(() => {
@@ -21,29 +28,31 @@ const Library: React.FC = () => {
             const history = JSON.parse(localStorage.getItem('sandtube_history') || '[]');
             setLocalHistory(history);
 
-            if (user?.sub) {
-                const status = await BackendAPI.getPremiumStatus(user.sub);
-                setIsPremium(status);
-                if (status) {
-                    const offline = await BackendAPI.getOfflineVideos(user.sub);
-                    setOfflineVideos(offline);
-                }
-            }
-
             if (user?.accessToken) {
                 try {
-                    const [liked, myPlaylists, channel] = await Promise.all([
+                    const [liked, myPlaylists, channel] = await Promise.allSettled([
                         getMyLikedVideos(user.accessToken),
                         getMyPlaylists(user.accessToken),
                         getMyChannel(user.accessToken)
                     ]);
-                    setLikedVideos(liked);
-                    setPlaylists(myPlaylists);
-                    setMyChannel(channel);
+                    if (liked.status === 'fulfilled') setLikedVideos(liked.value);
+                    if (myPlaylists.status === 'fulfilled') setPlaylists(myPlaylists.value);
+                    if (channel.status === 'fulfilled') setMyChannel(channel.value);
                 } catch (error) {
                     console.error("Error fetching library data:", error);
                 }
             }
+            setYtDone(true);
+            try {
+                if (user?.sub) {
+                    const status = await BackendAPI.getPremiumStatus(user.sub);
+                    setIsPremium(status);
+                    if (status) {
+                        const offline = await BackendAPI.getOfflineVideos(user.sub);
+                        setOfflineVideos(offline);
+                    }
+                }
+            } catch (e) { /* Firebase unavailable */ }
         };
         fetchLibrary();
     }, [user?.accessToken]);
@@ -69,15 +78,16 @@ const Library: React.FC = () => {
     };
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease', padding: '20px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease', padding: mobile ? '12px' : '20px', minWidth: 0, overflowX: 'hidden' }}>
 
             {user && (
                 <div className="glass-morphism" style={{
-                    padding: '40px',
+                    padding: mobile ? '20px' : '40px',
                     borderRadius: '24px',
                     display: 'flex',
+                    flexWrap: 'wrap',
                     alignItems: 'center',
-                    gap: '30px',
+                    gap: mobile ? '16px' : '30px',
                     marginBottom: '50px',
                     background: 'linear-gradient(135deg, rgba(230, 185, 120, 0.1), rgba(0,0,0,0.4))',
                     border: '1px solid var(--primary-low)'
@@ -87,9 +97,9 @@ const Library: React.FC = () => {
                         alt=""
                         style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--primary)' }}
                     />
-                    <div style={{ flex: 1 }}>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{user.name}</h1>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{user.email} • {myChannel?.snippet?.customUrl || 'Loading handle...'}</p>
+                    <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+                        <h1 style={{ fontSize: mobile ? '1.6rem' : '2.5rem', fontWeight: 'bold' }}>{user.name}</h1>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{user.email} • {myChannel?.snippet?.customUrl || (ytDone ? 'YouTube handle unavailable' : 'Loading...')}</p>
                         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
                             <div style={{ textAlign: 'center' }}>
                                 <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{likedVideos.length}</div>
@@ -114,7 +124,7 @@ const Library: React.FC = () => {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '40px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: mobile ? 'minmax(0,1fr)' : '3fr 1fr', gap: '40px' }}>
 
                 <div className="library-left">
                     <section style={{ marginBottom: '60px' }}>

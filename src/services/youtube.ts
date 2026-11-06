@@ -3,6 +3,16 @@ import axios from 'axios';
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 const BASE_URL = 'https://www.googleapis.com/youtube/v3';
 
+// An expired or revoked Google token must not leave the UI looking signed in.
+axios.interceptors.response.use(undefined, (error) => {
+    const sentToken = String(error?.config?.headers?.Authorization || error?.config?.headers?.authorization || '').startsWith('Bearer ');
+    if (error?.response?.status === 401 && sentToken && localStorage.getItem('user')) {
+        localStorage.removeItem('user');
+        window.location.reload();
+    }
+    return Promise.reject(error);
+});
+
 const youtube = axios.create({
     baseURL: BASE_URL,
     params: {

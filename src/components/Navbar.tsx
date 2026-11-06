@@ -77,7 +77,8 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
 
                 const userData = {
                     ...res.data,
-                    accessToken: tokenResponse.access_token
+                    accessToken: tokenResponse.access_token,
+                    issuedAt: Date.now()
                 };
 
                 setUser(userData);
