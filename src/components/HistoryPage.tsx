@@ -6,6 +6,17 @@ const HistoryPage: React.FC = () => {
     const [localHistory, setLocalHistory] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isPaused, setIsPaused] = useState(false);
+    const [mobile, setMobile] = useState(window.innerWidth < 900);
+    useEffect(() => {
+        const f = () => setMobile(window.innerWidth < 900);
+        window.addEventListener('resize', f);
+        return () => window.removeEventListener('resize', f);
+    }, []);
+    const removeItem = (vid: any) => {
+        const next = localHistory.filter(v => (v.id?.videoId || v.id) !== vid);
+        localStorage.setItem('sandtube_history', JSON.stringify(next));
+        setLocalHistory(next);
+    };
 
     useEffect(() => {
         const history = JSON.parse(localStorage.getItem('sandtube_history') || '[]');
@@ -45,7 +56,7 @@ const HistoryPage: React.FC = () => {
     );
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 350px', gap: '50px', animation: 'fadeIn 0.5s ease', padding: '20px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: mobile ? 'minmax(0,1fr)' : '1fr 350px', gap: mobile ? '24px' : '50px', animation: 'fadeIn 0.5s ease', padding: mobile ? '16px' : '20px' }}>
 
             <div className="history-list">
                 <h1 style={{ fontSize: '2rem', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -56,8 +67,8 @@ const HistoryPage: React.FC = () => {
                 {filteredHistory.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {filteredHistory.map((video, i) => (
-                            <div key={video.id + i} style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                                <div style={{ width: '280px', flexShrink: 0 }}>
+                            <div key={String(video.id?.videoId || video.id) + i} style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: mobile ? '8px' : '20px', alignItems: mobile ? 'stretch' : 'flex-start' }}>
+                                <div style={{ width: mobile ? '100%' : '280px', flexShrink: 0 }}>
                                     <VideoCard
                                         id={video.id.videoId || video.id}
                                         thumbnail={video.snippet.thumbnails.high?.url}
@@ -68,7 +79,7 @@ const HistoryPage: React.FC = () => {
                                         channelImage=""
                                     />
                                 </div>
-                                <div style={{ flex: 1, padding: '10px 0' }}>
+                                <div style={{ flex: 1, minWidth: 0, padding: '10px 0' }}>
                                     <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', lineHeight: '1.4' }}>{video.snippet.title}</h3>
                                     <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '10px' }}>
                                         {video.snippet.channelTitle} • {formatViews(video.statistics?.viewCount)} views
@@ -79,6 +90,7 @@ const HistoryPage: React.FC = () => {
                                     <div style={{ marginTop: '15px', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold' }}>
                                         Watched {getTimeAgo(video.watchedAt)}
                                     </div>
+                                    <button onClick={() => removeItem(video.id?.videoId || video.id)} style={{ marginTop: '10px', background: 'var(--surface)', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '50px', cursor: 'pointer', fontSize: '0.8rem' }}>Remove from history</button>
                                 </div>
                             </div>
                         ))}
@@ -92,7 +104,7 @@ const HistoryPage: React.FC = () => {
                 )}
             </div>
 
-            <div className="history-controls" style={{ position: 'sticky', top: '90px', height: 'fit-content' }}>
+            <div className="history-controls" style={{ position: mobile ? 'static' : 'sticky', top: '90px', height: 'fit-content', minWidth: 0 }}>
                 <div style={{ position: 'relative', marginBottom: '30px' }}>
                     <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input
