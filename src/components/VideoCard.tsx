@@ -13,9 +13,10 @@ interface VideoCardProps {
     timestamp: string;
     channelImage: string;
     horizontal?: boolean;
+    duration?: string;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, channelId, views, timestamp, channelImage, horizontal = false }) => {
+const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, channelId, views, timestamp, channelImage, horizontal = false, duration = '' }) => {
     const navigate = useNavigate();
     const [isPremium, setIsPremium] = useState(false);
     const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -82,9 +83,15 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
                 <img
                     src={thumbnail}
                     alt={title}
+                    loading="lazy"
+                    onError={(e) => {
+                        const img = e.currentTarget;
+                        const fallback = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+                        if (img.src !== fallback) img.src = fallback;
+                    }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
-                <div style={{
+                {duration && <div style={{
                     position: 'absolute',
                     bottom: '6px',
                     right: '6px',
@@ -94,8 +101,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ id, thumbnail, title, channel, ch
                     fontSize: '0.75rem',
                     fontWeight: '500'
                 }}>
-                    12:45
-                </div>
+                    {duration}
+                </div>}
                 {!horizontal && (
                     <div className="card-actions-overlay" style={{
                         position: 'absolute',

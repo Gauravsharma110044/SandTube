@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon, Music, Trophy, Newspaper, Gamepad2, Crown } from 'lucide-react';
+import { Home, PlaySquare, Clock, ThumbsUp, History, Library as LibraryIcon, Settings, Flag, HelpCircle, MessageSquare, Compass as ExploreIcon, Music, Trophy, Newspaper, Gamepad2, Crown, ListVideo } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getMySubscriptions } from '../services/youtube.ts';
 import BackendAPI from '../services/backend.ts';
@@ -101,6 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             <SidebarItem icon={<LibraryIcon size={22} />} label="Library" active={isActive('/library')} onClick={() => navigate('/library')} />
             <SidebarItem icon={<History size={22} />} label="History" active={isActive('/history')} onClick={() => navigate('/history')} />
             <SidebarItem icon={<PlaySquare size={22} />} label="Your videos" active={isActive('/studio')} onClick={() => navigate('/studio')} />
+            <SidebarItem icon={<ListVideo size={22} />} label="Playlists" active={isActive('/playlists')} onClick={() => navigate('/playlists')} />
             <SidebarItem icon={<Clock size={22} />} label="Watch later" active={isActive('/watch-later')} onClick={() => navigate('/watch-later')} />
             <SidebarItem icon={<ThumbsUp size={22} />} label="Liked videos" active={isActive('/liked-videos')} onClick={() => navigate('/liked-videos')} />
 

@@ -4,6 +4,7 @@ import VideoCard from './VideoCard.tsx';
 import AdBanner from './AdBanner.tsx';
 import { getPopularVideos } from '../services/youtube.ts';
 import BackendAPI from '../services/backend.ts';
+import { formatDuration } from '../services/localLibrary.ts';
 
 const categories = ["All", "Sand Art", "Tech", "Gaming", "Music", "Live", "Artificial Intelligence", "Deserts", "Architecture", "Minimalism", "Coding", "Gadgets", "Travel"];
 
@@ -142,13 +143,14 @@ const VideoGrid: React.FC = () => {
                             )}
                             <VideoCard
                                 id={video.id.videoId || video.id}
-                                thumbnail={video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url}
+                                thumbnail={video.snippet.thumbnails.high?.url || video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url}
                                 title={video.snippet.title}
                                 channel={video.snippet.channelTitle}
                                 channelId={video.snippet.channelId}
                                 views={formatViews(video.statistics?.viewCount)}
                                 timestamp={getTimeAgo(video.snippet.publishedAt)}
                                 channelImage={video.snippet.thumbnails.default.url}
+                                duration={formatDuration(video.contentDetails?.duration)}
                             />
                         </React.Fragment>
                     ))

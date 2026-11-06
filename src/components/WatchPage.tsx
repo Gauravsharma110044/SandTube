@@ -5,6 +5,7 @@ import VideoCard from './VideoCard.tsx';
 import VideoPlayer from './VideoPlayer.tsx';
 import CommentSection from './CommentSection.tsx';
 import PlaylistModal from './PlaylistModal.tsx';
+import { toggleWatchLater, isInWatchLater, formatDuration } from '../services/localLibrary.ts';
 import AdBanner from './AdBanner.tsx';
 import { getVideoDetails, getRelatedVideos, getChannelDetails } from '../services/youtube.ts';
 import { analyticsEngine, socialEngine, notificationEngine } from '../engines/index.ts';
@@ -242,40 +243,15 @@ const WatchPage: React.FC = () => {
         BackendAPI.trackView(id!, user?.sub || 'anonymous', 0); // Track share as engagement
     };
 
-    const handleWatchLater = async () => {
+    const [savedLater, setSavedLater] = useState(false);
+    useEffect(() => { if (id) setSavedLater(isInWatchLater(id)); }, [id]);
+
+    // Saved on this device only (localStorage). No sign-in needed.
+    const handleWatchLater = () => {
         if (!video) return;
-
-        if (user?.sub) {
-            try {
-                // For the UI toggle, we'd ideally have an 'isSaved' state
-                // But let's check current list first
-                const currentList = await BackendAPI.getWatchLaterByUser(user.sub);
-                const exists = currentList.find((v: any) => (v.id.videoId || v.id) === id);
-
-                if (exists) {
-                    await BackendAPI.removeFromWatchLater(user.sub, id!);
-                    notificationEngine.createNotification('upload', 'Removed', 'Video removed from Watch Later');
-                } else {
-                    await BackendAPI.addToWatchLater(user.sub, id!, video);
-                    notificationEngine.createNotification('upload', 'Saved', 'Video added to Watch Later');
-                }
-            } catch (error) {
-                console.error("Error toggling watch later:", error);
-            }
-        } else {
-            const currentList = JSON.parse(localStorage.getItem('sandtube_watch_later') || '[]');
-            const exists = currentList.find((v: any) => (v.id.videoId || v.id) === id);
-
-            if (exists) {
-                const updated = currentList.filter((v: any) => (v.id.videoId || v.id) !== id);
-                localStorage.setItem('sandtube_watch_later', JSON.stringify(updated));
-                notificationEngine.createNotification('upload', 'Removed', 'Video removed from Watch Later');
-            } else {
-                const updated = [video, ...currentList].slice(0, 50);
-                localStorage.setItem('sandtube_watch_later', JSON.stringify(updated));
-                notificationEngine.createNotification('upload', 'Saved', 'Video added to Watch Later');
-            }
-        }
+        const nowSaved = toggleWatchLater(video);
+        setSavedLater(nowSaved);
+        notificationEngine.createNotification('upload', nowSaved ? 'Saved' : 'Removed', nowSaved ? 'Added to Watch Later (this device)' : 'Removed from Watch Later');
     };
 
     const handleDownload = async () => {
@@ -436,7 +412,13 @@ const WatchPage: React.FC = () => {
                                 onClick={handleWatchLater}
                                 style={{ background: 'var(--surface)', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '50px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
                             >
-                                <Plus size={16} /> Save
+                                <Plus size={16} /> {savedLater ? 'Saved to Watch later' : 'Watch later'}
+                            </button>
+                            <button
+                                onClick={() => setShowPlaylistModal(true)}
+                                style={{ background: 'var(--surface)', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '50px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
+                            >
+                                <Plus size={16} /> Playlist
                             </button>
                             <button
                                 onClick={handleSummarize}
@@ -567,15 +549,16 @@ const WatchPage: React.FC = () => {
                         title={vid.snippet.title}
                         channel={vid.snippet.channelTitle}
                         channelId={vid.snippet.channelId}
-                        views=""
+                        views={vid.statistics?.viewCount ? formatCount(vid.statistics.viewCount) : ''}
                         timestamp={new Date(vid.snippet.publishedAt).toLocaleDateString()}
                         channelImage={vid.snippet.thumbnails.default.url}
+                        duration={formatDuration(vid.contentDetails?.duration)}
                         horizontal={!effectiveTheatreMode || window.innerWidth > 1000}
                     />
                 ))}
             </div>
 
-            {showPlaylistModal && <PlaylistModal videoId={id || ''} onClose={() => setShowPlaylistModal(false)} />}
+            {showPlaylistModal && <PlaylistModal video={video} onClose={() => setShowPlaylistModal(false)} />}
         </div >
     );
 };

@@ -41,6 +41,10 @@ const AdBanner: React.FC<AdBannerProps> = ({ slot, format = 'auto', style }) => 
                 data-ad-slot={slot}
                 data-ad-format={format}
                 data-full-width-responsive="true"></ins>
+            <style>{`
+                ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+                .ad-container:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
+            `}</style>
         </div>
     );
 };

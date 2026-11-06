@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getEnrichedSearchResults } from '../services/youtube.ts';
 import { SlidersHorizontal, X } from 'lucide-react';
 import BackendAPI from '../services/backend.ts';
+import { formatDuration } from '../services/localLibrary.ts';
 
 const SearchPage: React.FC = () => {
     const [videos, setVideos] = useState<any[]>([]);
@@ -199,13 +200,18 @@ const SearchPage: React.FC = () => {
                         >
                             <div style={{ position: 'relative', width: '360px', flexShrink: 0 }}>
                                 <img
-                                    src={video.snippet.thumbnails.high.url}
+                                    src={video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.default?.url}
                                     alt=""
+                                    onError={(e) => {
+                                        const vid = video.id?.videoId || video.id;
+                                        const fb = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+                                        if (e.currentTarget.src !== fb) e.currentTarget.src = fb;
+                                    }}
                                     style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '12px' }}
                                 />
-                                {video.contentDetails?.duration && (
+                                {formatDuration(video.contentDetails?.duration) && (
                                     <div style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.8)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '500' }}>
-                                        {video.contentDetails.duration.replace('PT', '').replace('H', ':').replace('M', ':').replace('S', '')}
+                                        {formatDuration(video.contentDetails?.duration)}
                                     </div>
                                 )}
                             </div>

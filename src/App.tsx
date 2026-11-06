@@ -13,7 +13,8 @@ import HistoryPage from './components/HistoryPage.tsx';
 import LikedVideosPage from './components/LikedVideosPage.tsx';
 import SubscriptionsPage from './components/SubscriptionsPage.tsx';
 import ChannelPage from './components/ChannelPage.tsx';
-import PlaylistPage from './components/PlaylistPage.tsx';
+import LocalPlaylistPage from './components/LocalPlaylistPage.tsx';
+import PlaylistsPage from './components/PlaylistsPage.tsx';
 import SearchPage from './components/SearchPage.tsx';
 import CreatorStudio from './components/CreatorStudio.tsx';
 import MobileBottomNav from './components/MobileBottomNav.tsx';
@@ -136,7 +137,8 @@ const MainLayout: React.FC = () => {
             <Route path="/subscriptions" element={<SubscriptionsPage />} />
             <Route path="/watch-later" element={<WatchLaterPage />} />
             <Route path="/channel/:channelId" element={<ChannelPage />} />
-            <Route path="/playlist/:playlistId" element={<PlaylistPage />} />
+            <Route path="/playlist/:playlistId" element={<LocalPlaylistPage />} />
+            <Route path="/playlists" element={<PlaylistsPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/premium" element={<PremiumPage />} />
             <Route path="/studio" element={<CreatorStudio />} />

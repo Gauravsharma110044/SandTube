@@ -169,6 +169,23 @@ export const getVideoDetails = async (videoId: string) => {
     }
 };
 
+// Add statistics and duration (search results don't carry them).
+const withDetails = async (items: any[]) => {
+    const ids = items.map((i: any) => i.id?.videoId || i.id).filter(Boolean).join(',');
+    if (!ids) return items;
+    try {
+        const r = await youtube.get('/videos', { params: { part: 'contentDetails,statistics', id: ids } });
+        const byId: any = {};
+        (r.data.items || []).forEach((v: any) => { byId[v.id] = v; });
+        return items.map((i: any) => {
+            const d = byId[i.id?.videoId || i.id];
+            return d ? { ...i, statistics: d.statistics, contentDetails: d.contentDetails } : i;
+        });
+    } catch {
+        return items;
+    }
+};
+
 export const getRelatedVideos = async (videoId: string) => {
     // YouTube removed the relatedToVideoId search option, so build "related" from
     // a search on this video's title, falling back to popular videos.
@@ -181,7 +198,7 @@ export const getRelatedVideos = async (videoId: string) => {
                 params: { part: 'snippet', q, type: 'video', maxResults: 12 }
             });
             const items = cleanItems(response.data.items || []).filter((i: any) => i.id?.videoId && i.id.videoId !== videoId);
-            if (items.length > 0) return items;
+            if (items.length > 0) return await withDetails(items);
         }
         throw new Error('No related results');
     } catch (error: any) {
