@@ -97,7 +97,7 @@ const Library: React.FC = () => {
                         alt=""
                         style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--primary)' }}
                     />
-                    <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+                    <div style={{ flex: '1 1 220px', minWidth: 0, overflowWrap: 'anywhere' }}>
                         <h1 style={{ fontSize: mobile ? '1.6rem' : '2.5rem', fontWeight: 'bold' }}>{user.name}</h1>
                         <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{user.email} • {myChannel?.snippet?.customUrl || (ytDone ? 'YouTube handle unavailable' : 'Loading...')}</p>
                         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
